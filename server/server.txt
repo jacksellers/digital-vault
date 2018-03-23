@@ -1,0 +1,1 @@
+This directory contains the server code that will run on top of bitcoind.

@@ -1,0 +1,1 @@
+This directory contains the client code that will manage private keys and wallet software.
