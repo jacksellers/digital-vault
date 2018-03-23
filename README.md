@@ -1,8 +1,8 @@
 # Digital Vault
 ### A multi-signature Bitcoin custody solution for Intel SGX
 #### Dependencies:
-- Flask
-- Python 3
+- [Flask](http://flask.pocoo.org/)
+- [Python 3](https://www.python.org/)
 #### Installation:
 ```
 git clone https://github.com/jackwsellers/digital-vault
