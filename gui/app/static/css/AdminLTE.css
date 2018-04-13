@@ -90,6 +90,11 @@ body {
   background-color: #b1b1b1;
   z-index: 800;
 }
+.content-wrapper-login {
+  min-height: 100%;
+  background-color: #000000;
+  z-index: 800;
+}
 .main-footer {
   background: rgb(0, 0, 0);
   padding: 15px;
@@ -4985,5 +4990,11 @@ a.rss-link {
   color: white;
 }
 a.id-link {
+  color: white;
+}
+.welcome-message {
+  color: white;
+}
+.new-user {
   color: white;
 }
