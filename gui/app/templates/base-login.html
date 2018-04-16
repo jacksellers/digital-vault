@@ -28,6 +28,7 @@
 	<div class="limiter">
 		<div class="container-login100" style="background-color: black;">
 			<div class="wrap-login100 p-t-190 p-b-30">
+
                 {% with messages = get_flashed_messages() %}
                 {% if messages %}
                 <ul>
@@ -38,7 +39,7 @@
                 {% endif %}
                 {% endwith %}
 
-                    {% block content %}{% endblock %}
+                {% block content %}{% endblock %}
 
 
 <!--===============================================================================================-->	
