@@ -1,9 +1,9 @@
 from flask_login import current_user, login_user, logout_user, login_required
 from flask import render_template, flash, redirect, url_for, request
 from werkzeug.urls import url_parse
-from app.forms import LoginForm
+from app.forms import LoginForm, RegistrationForm
 from app.models import User
-from app import app
+from app import app, db
 
 
 @app.route('/')
@@ -23,7 +23,7 @@ def login():
         if user is None or not user.check_password(form.password.data):
             flash('Invalid username or password')
             return redirect(url_for('login'))
-        login_user(user, remember=form.remember_me.data)
+        login_user(user)
         next_page = request.args.get('next')
         if not next_page or url_parse(next_page).netloc != '':
             next_page = url_for('index')
@@ -37,16 +37,22 @@ def logout():
     return redirect(url_for('login'))
 
 
-@app.route('/signup', methods=['GET', 'POST'])
-def signup():
-    form = LoginForm()
-    if form.validate_on_submit():
-        flash('Login requested for user {}, remember_me={}'.format(
-            form.username.data, form.remember_me.data))
+@app.route('/register', methods=['GET', 'POST'])
+def register():
+    if current_user.is_authenticated:
         return redirect(url_for('index'))
-    return render_template('signup.html', title='Sign In', form=form)
+    form = RegistrationForm()
+    if form.validate_on_submit():
+        user = User(first_name=form.first_name.data,
+                    last_name=form.last_name.data, username=form.username.data)
+        user.set_password(form.password.data)
+        db.session.add(user)
+        db.session.commit()
+        return redirect(url_for('login'))
+    return render_template('register.html', title='Register', form=form)
 
 
 @app.route('/trade')
+@login_required
 def trade():
     return render_template('trade.html')
