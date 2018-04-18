@@ -1,5 +1,5 @@
-from app import app, db
 from app.models import User, Balance
+from app import app, db
 
 
 @app.shell_context_processor
