@@ -2,15 +2,16 @@ from flask_login import current_user, login_user, logout_user, login_required
 from flask import render_template, flash, redirect, url_for, request
 from werkzeug.urls import url_parse
 from app.forms import LoginForm, RegistrationForm
-from app.models import User
+from app.models import User, Balance
 from app import app, db
 
 
-@app.route('/')
-@app.route('/index')
-@login_required
-def index():
-    return render_template('index.html')
+@app.errorhandler(404)
+def page_not_found(e):
+    if current_user.is_authenticated:
+        return redirect(url_for('index'))
+    else:
+        return redirect(url_for('login'))
 
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -46,10 +47,22 @@ def register():
         user = User(first_name=form.first_name.data,
                     last_name=form.last_name.data, username=form.username.data)
         user.set_password(form.password.data)
+        balance = Balance(balance_btc=0, balance_usd=500000, client=user)
         db.session.add(user)
+        db.session.add(balance)
         db.session.commit()
+        flash('You have successfully registered - please log in')
         return redirect(url_for('login'))
     return render_template('register.html', title='Register', form=form)
+
+
+@app.route('/')
+@app.route('/index')
+@login_required
+def index():
+    user = current_user
+    balances = Balance.query.get(user.id)
+    return render_template('index.html', user=user, balances=balances)
 
 
 @app.route('/trade')

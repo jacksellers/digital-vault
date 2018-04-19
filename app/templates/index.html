@@ -19,12 +19,12 @@
           <div class="small-box bg-aqua">
             <div class="inner">
               <h3>Balances</h3>
-              <h4><strong>10.0000</strong> <sub>BTC</sub></h4>
-              <h4><strong>837,835</strong> <sub>USD</sub></h4>
+              <h4 id="balance_btc"></h4>
+              <h4 id="balance_usd"></h4>
               <hr>
 
               <!-- TAKE CORRECT HTML FROM TEMPORARY SCRIPT ? -->
-              <h5 id="balance"></h5>
+              <h4 id="balance_total"></h4>
               <!-- TAKE CORRECT HTML FROM TEMPORARY SCRIPT ? -->
               <br>
             </div>
@@ -75,11 +75,14 @@
 
                       // TEMPORARY SCRIPT
                       var price = parseFloat($('#last').text().substring(1).replace(/,/g, ''));
+                      var usd_equivalent = {{ balances.balance_btc }} * price;
                       var balance = 837835 + (10 * price);
                       var pnlUSD = balance - 1000000 - (-10 * price);
                       var pnlChange = pnlUSD / 1000000;
                       var pnlPercentage = (pnlChange * 100).toFixed(2);
-                      $('#balance').html("<strong>" + numberWithCommas(balance) + " </strong><sub>Total (USD equivalent)</sub>");
+                      $('#balance_btc').html("<strong>" + numberWithCommas({{ balances.balance_btc }}) + "</strong> <sub>BTC </sub><strong>(" + usd_equivalent + " </strong><sub>USD</sub><strong>)</strong>");
+                      $('#balance_usd').html("<strong>" + numberWithCommas({{ balances.balance_usd }}) + "</strong> <sub>USD</sub>");
+                      $('#balance_total').html("<strong>" + numberWithCommas(balance) + " </strong><sub>USD (total)</sub>");
                       $('#pnlUSD').html("<strong>Total PnL: " + numberWithCommas(pnlUSD) + " </strong><sub>USD</sub>")
                       $('#pnlPercentage').html("<strong>Total PnL: " + pnlPercentage + "</strong>%")
                       // TEMPORARY SCRIPT

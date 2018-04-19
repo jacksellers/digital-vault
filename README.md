@@ -1,8 +1,8 @@
 # Digital Vault
 ### A multi-signature Bitcoin custody solution
 ##### 1. Flask app (website)
-##### 2. Electrum wallet
-##### 3. Electrumx Server
+##### 2. Wallet
+##### 3. Server
 #### 1. Flask app
 ###### Dependencies:
 - [Flask](http://flask.pocoo.org/)
