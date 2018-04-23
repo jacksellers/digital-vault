@@ -47,9 +47,9 @@ def register():
         user = User(first_name=form.first_name.data,
                     last_name=form.last_name.data, username=form.username.data)
         user.set_password(form.password.data)
-        balance = Balance(balance_btc=0, balance_usd=500000, client=user)
-        db.session.add(user)
-        db.session.add(balance)
+        user_balance = Balance(balance_btc=0, balance_usd=500000,
+                               user_id=user.id)
+        db.session.add_all([user, user_balance])
         db.session.commit()
         flash('You have successfully registered - please log in')
         return redirect(url_for('login'))

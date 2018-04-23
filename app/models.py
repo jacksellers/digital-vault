@@ -6,8 +6,8 @@ from hashlib import md5
 
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    first_name = db.Column(db.String(64), index=True, unique=True)
-    last_name = db.Column(db.String(64), index=True, unique=True)
+    first_name = db.Column(db.String(64), index=True)
+    last_name = db.Column(db.String(64), index=True)
     username = db.Column(db.String(64), index=True, unique=True)
     password_hash = db.Column(db.String(128))
     balances = db.relationship('Balance', backref='client', lazy='dynamic')
@@ -25,8 +25,8 @@ class User(UserMixin, db.Model):
 
 class Balance(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    balance_btc = db.Column(db.Float, index=True, unique=True)
-    balance_usd = db.Column(db.Float, index=True, unique=True)
+    balance_btc = db.Column(db.Float, index=True)
+    balance_usd = db.Column(db.Float, index=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
 
     def __repr__(self):

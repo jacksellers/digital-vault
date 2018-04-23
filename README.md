@@ -13,7 +13,6 @@ git clone https://github.com/jackwsellers/digital-vault
 ```
 ###### Running the app:
 ```
-cd digital-vault/gui
 export FLASK_APP=gui.py FLASK_DEBUG=1
 flask run
 ```
