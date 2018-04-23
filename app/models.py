@@ -1,5 +1,6 @@
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import UserMixin
+from datetime import datetime
 from app import db, login
 from hashlib import md5
 
@@ -32,6 +33,22 @@ class Balance(db.Model):
     def __repr__(self):
         return '{}: Balance (BTC): {}, Balance (USD): {}'.format(
             self.id, self.balance_btc, self.balance_usd)
+
+
+class Transaction(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
+    currency = db.Column(db.String(64), index=True)
+    tx_type = db.Column(db.String(64), index=True)
+    amount = db.Column(db.Float, index=True)
+    price = db.Column(db.Float, index=True)
+    tx_id = db.Column(db.Integer, index=True, unique=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+
+    def __repr__(self):
+        return '{}: Timestamp: {}, Type: {}, Currency: {}, Amount: {}'.format(
+            self.id, self.timestamp, self.tx_type,
+            self.ccy, self.amount)
 
 
 @login.user_loader

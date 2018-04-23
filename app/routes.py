@@ -1,8 +1,8 @@
 from flask_login import current_user, login_user, logout_user, login_required
 from flask import render_template, flash, redirect, url_for, request
-from werkzeug.urls import url_parse
 from app.forms import LoginForm, RegistrationForm
-from app.models import User, Balance
+from app.models import User, Balance, Transaction
+from werkzeug.urls import url_parse
 from app import app, db
 
 
@@ -62,10 +62,13 @@ def register():
 def index():
     user = current_user
     balances = Balance.query.get(user.id)
-    return render_template('index.html', user=user, balances=balances)
+    transactions = Transaction.query.get(user.id)
+    return render_template('index.html', user=user, balances=balances,
+                           transactions=transactions)
 
 
 @app.route('/trade')
 @login_required
 def trade():
-    return render_template('trade.html')
+    user = current_user
+    return render_template('trade.html', user=user)
