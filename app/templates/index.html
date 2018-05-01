@@ -38,7 +38,7 @@
           <div class="small-box bg-green">
             <div class="inner">
               <h3>BTC/USD</h3>
-              <h3 id="last">$</h3>
+              <h3 id="last"></h3>
               <br>
               
               <h4 id="daily-change"><strong>Change (24h): </strong></h4>
@@ -63,24 +63,24 @@
                         return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
                       }
                       if (dailyChange > 0) {
-                        $('#daily-change').html("<h4><strong>Change (24h): <span class='green-change'>" + dailyChange + "%</span></strong></h4>");
+                        $('#daily-change').html("<h4><strong>Change (24h): <span class='green-change'>" + dailyChange + "% &#9650;</span></strong></h4>");
                       } else {
-                        $('#daily-change').html("<h4><strong>Change (24h): <span class='red-change'>" + dailyChange + "%</span></strong></h4>");
+                        $('#daily-change').html("<h4><strong>Change (24h): <span class='red-change'>" + dailyChange + "% &#9660;</span></strong></h4>");
                       }
                       if (last > previousLast) {
-                        $('#last').html("<h3 style='color:green;'>" + "$" + numberWithCommas(last) + "</h3>");
+                        $('#last').html("<h3 style='color:green;'>$" + numberWithCommas(last) + " &#9650;</h3>");
                       } else {
-                        $('#last').html("<h3 style='color:red;'>" + "$" + numberWithCommas(last) + "</h3>");
+                        $('#last').html("<h3 style='color:red;'>$" + numberWithCommas(last) + " &#9660;</h3>");
                       }
 
                       // TEMPORARY SCRIPT
                       var price = parseFloat($('#last').text().substring(1).replace(/,/g, ''));
                       var usd_equivalent = {{ balances.balance_btc }} * price;
-                      var balance = 837835 + (10 * price);
-                      var pnlUSD = balance - 1000000 - (-10 * price);
-                      var pnlChange = pnlUSD / 1000000;
+                      var balance = {{ balances.balance_usd }} + usd_equivalent;
+                      var pnlUSD = balance - 500000 + (0 * price); // REPLACE '0' WITH NET DEPOSITS & WITHDRAWALS (see spreadsheet)
+                      var pnlChange = pnlUSD / 500000;
                       var pnlPercentage = (pnlChange * 100).toFixed(2);
-                      $('#balance_btc').html("<strong>" + numberWithCommas({{ balances.balance_btc }}) + "</strong> <sub>BTC </sub><strong>(" + usd_equivalent + " </strong><sub>USD</sub><strong>)</strong>");
+                      $('#balance_btc').html("<strong>" + numberWithCommas({{ balances.balance_btc }}) + "</strong> <sub>BTC </sub><strong>(" + numberWithCommas(usd_equivalent) + " </strong><sub>USD</sub><strong>)</strong>");
                       $('#balance_usd').html("<strong>" + numberWithCommas({{ balances.balance_usd }}) + "</strong> <sub>USD</sub>");
                       $('#balance_total').html("<strong>" + numberWithCommas(balance) + " </strong><sub>USD (total)</sub>");
                       $('#pnlUSD').html("<strong>Total PnL: " + numberWithCommas(pnlUSD) + " </strong><sub>USD</sub>")

@@ -21,6 +21,9 @@
   <link rel="stylesheet" href="static/bower_components/morris.js/morris.css">
   <!-- jQuery -->
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+  <script type=text/javascript>
+    $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
+  </script>
   <!-- RSS jQuery -->
   <script src="static/js/jquery.rss.js"></script>
   <!-- jvectormap -->

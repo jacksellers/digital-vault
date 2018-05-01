@@ -1,5 +1,6 @@
 from wtforms.validators import ValidationError, DataRequired, Email, EqualTo
-from wtforms import StringField, PasswordField, BooleanField, SubmitField
+from wtforms import StringField, PasswordField, BooleanField, SubmitField, \
+                    FloatField, RadioField
 from wtforms.validators import DataRequired
 from flask_wtf import FlaskForm
 from app.models import User
@@ -22,3 +23,12 @@ class RegistrationForm(FlaskForm):
         user = User.query.filter_by(username=username.data).first()
         if user is not None:
             raise ValidationError('That username is taken.')
+
+
+class TradeForm(FlaskForm):
+    option = RadioField('Trade Option', validators=[DataRequired()],
+                        choices=[('Buy', 'Buy'), ('Sell', 'Sell')])
+    btc_amount = FloatField('Amount (BTC)', validators=[DataRequired()])
+    price = FloatField('Price')
+    total = FloatField('Total')
+    trade = SubmitField('Trade')

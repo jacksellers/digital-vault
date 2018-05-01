@@ -12,6 +12,8 @@ class User(UserMixin, db.Model):
     username = db.Column(db.String(64), index=True, unique=True)
     password_hash = db.Column(db.String(128))
     balances = db.relationship('Balance', backref='client', lazy='dynamic')
+    trades = db.relationship('Trade', backref='client', lazy='dynamic')
+    transfers = db.relationship('Transfer', backref='client', lazy='dynamic')
 
     def __repr__(self):
         return '{}: {} {} @{}'.format(
@@ -31,24 +33,37 @@ class Balance(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
 
     def __repr__(self):
-        return '{}: Balance (BTC): {}, Balance (USD): {}'.format(
-            self.id, self.balance_btc, self.balance_usd)
+        return '{}: Balance (BTC): {}, Balance (USD): {}, User ID: {}'.format(
+            self.id, self.balance_btc, self.balance_usd, self.user_id)
 
 
-class Transaction(db.Model):
+class Trade(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
-    currency = db.Column(db.String(64), index=True)
     tx_type = db.Column(db.String(64), index=True)
     amount = db.Column(db.Float, index=True)
     price = db.Column(db.Float, index=True)
-    tx_id = db.Column(db.Integer, index=True, unique=True)
+    total = db.Column(db.Float, index=True, default=amount*price)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
 
     def __repr__(self):
-        return '{}: Timestamp: {}, Type: {}, Currency: {}, Amount: {}'.format(
-            self.id, self.timestamp, self.tx_type,
-            self.ccy, self.amount)
+        return '{}: Timestamp: {}, Type: {}, Amount: {}, User ID: {}'.format(
+            self.id, self.timestamp, self.tx_type, self.amount, self.user_id)
+
+
+class Transfer(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
+    tx_type = db.Column(db.String(64), index=True)
+    amount = db.Column(db.Float, index=True)
+    currency = db.Column(db.String(64), index=True)
+    tx_id = db.Column(db.Integer, index=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+
+    def __repr__(self):
+        return '''{}: Timestamp: {}, Type: {}, Currency: {}, Amount: {}, 
+    User ID: {}'''.format(self.id, self.timestamp, self.tx_type, 
+                          self.currency, self.amount, self.user_id)
 
 
 @login.user_loader
