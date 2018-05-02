@@ -79,9 +79,9 @@ def index():
 @login_required
 def trade():
     user = current_user
+    balances = Balance.query.filter_by(user_id=user.id).first()
     form = TradeForm()
     if form.validate_on_submit():
-        balances = Balance.query.filter_by(user_id=user.id).first()
         tx_type = form.option.data
         amount = form.btc_amount.data
         price = session['price']
@@ -104,12 +104,14 @@ def trade():
                                    user_id=user.id)
             db.session.add_all([trade, new_balances])
             db.session.commit()
+            balances = Balance.query.filter_by(user_id=user.id).first()
             message = 'Your trade was successful'  # ADD ALL TRADE DETAILS !
         else:
             message = 'Your trade was unsuccessful - insufficient funds'
     else:
         message = ''
-    return render_template('trade.html', user=user, form=form, message=message)
+    return render_template('trade.html', user=user, balances=balances,
+                           form=form, message=message)
 
 
 @app.route('/get_price')
@@ -123,5 +125,7 @@ def add_numbers():
 @app.route('/history')
 def history():
     user = current_user
+    balances = Balance.query.filter_by(user_id=user.id).first()
     table = Table(user)
-    return render_template('history.html', user=user, table=table)
+    return render_template('history.html', user=user, balances=balances,
+                           table=table)

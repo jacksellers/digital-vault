@@ -34,6 +34,8 @@
   <link rel="stylesheet" href="static/bower_components/bootstrap-daterangepicker/daterangepicker.css">
   <!-- bootstrap wysihtml5 - text editor -->
   <link rel="stylesheet" href="plugins/bootstrap-wysihtml5/bootstrap3-wysihtml5.css">
+  <!-- Font awesome icons etc -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
   <!-- Tab icon -->
   <link rel="shortcut icon" href="{{ url_for('static', filename='img/favicon-32x32.png') }}">
 
@@ -58,14 +60,140 @@
       <!-- logo for regular state and mobile devices -->
       <span class="logo-lg"><img src="static/img/HSBC_Logo.png"></span>
     </a>
-    <!-- Header Navbar: style can be found in header.less -->
-    <nav class="navbar navbar-static-top">
-      <!-- Sidebar toggle button-->
-      <a href="#" class="sidebar-toggle" data-toggle="push-menu" role="button">
-        <span class="sr-only">Toggle navigation</span>
-      </a>
 
-    </nav>
+  <script>
+      $(document).ready(function() {
+        var ws = new WebSocket('wss://api.bitfinex.com/ws/');
+        ws.onopen = function() {
+          ws.send(JSON.stringify( {
+            "event":"subscribe", "channel":"ticker", "pair":"tBTCUSD"
+          }));
+        };
+        ws.onmessage = function(msg) {
+          var response = JSON.parse(msg.data);
+          var responseRaw = msg.data;
+          var hb = response[1];
+          if (hb != "hb") {
+            var previousLast = parseFloat($('#last').text().substring(1).replace(/,/g, ''));
+            var dailyChange = (response[6] * 100).toFixed(2);
+            var last = Math.round(response[7]);
+            const numberWithCommas = function(x) {
+              return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+            }
+            if (dailyChange > 0) {
+              $('#daily-change').html("<h4><strong>Change (24h): <span class='green-change'>" + dailyChange + "% &#9650;</span></strong></h4>");
+            } else {
+              $('#daily-change').html("<h4><strong>Change (24h): <span class='red-change'>" + dailyChange + "% &#9660;</span></strong></h4>");
+            }
+            if (last > previousLast) {
+              $('#last').html("<h3 style='color:green;'>$" + numberWithCommas(last) + " &#9650;</h3>");
+            } else {
+              $('#last').html("<h3 style='color:red;'>$" + numberWithCommas(last) + " &#9660;</h3>");
+            }
+
+            // TEMPORARY SCRIPT - Still need to incorporate net deposits and withdrawals
+            var price = parseFloat($('#last').text().substring(1).replace(/,/g, ''));
+            var usd_equivalent = {{ balances.balance_btc }} * price;
+            var balance = {{ balances.balance_usd }} + usd_equivalent;
+            var pnlUSD = balance - 500000 + (0 * price); // REPLACE '0' WITH NET DEPOSITS & WITHDRAWALS (see spreadsheet)
+            var pnlChange = pnlUSD / 500000;
+            var pnlPercentage = (pnlChange * 100).toFixed(2);
+
+            $('#balance_btc').html("<strong>" + numberWithCommas({{ balances.balance_btc }}) + "</strong> <sub>BTC </sub><strong>(&#8771; " + numberWithCommas(usd_equivalent) + " </strong><sub>USD</sub><strong>)</strong>");
+            $('#balance_usd').html("<strong>" + numberWithCommas({{ balances.balance_usd }}) + "</strong> <sub>USD</sub>");
+            $('#balance_total').html("<strong>" + numberWithCommas(balance) + " </strong><sub>Total USD value</sub>");
+            $('#pnlUSD').html("<strong>Total PnL: " + numberWithCommas(pnlUSD) + " </strong><sub>USD</sub>")
+            $('#pnlPercentage').html("<strong>Total PnL: " + pnlPercentage + "</strong>%")
+
+            $('#balance-header').html("<strong>BALANCES:</strong>")
+            $('#balance_btc-header').html("<strong>BTC:</strong> " + numberWithCommas({{ balances.balance_btc }}))
+            $('#balance_usd-header').html("<strong>USD:</strong> " + numberWithCommas({{ balances.balance_usd }}))
+            $('#last-header').html("<strong>BTC/USD:</strong> $" + numberWithCommas(last))
+            // TEMPORARY SCRIPT - Still need to incorporate net deposits and withdrawals
+
+          }
+        };
+      });
+  </script>
+
+<!-- Header Navbar: style can be found in header.less -->
+<nav class="navbar navbar-static-top">
+    <!-- Sidebar toggle button-->
+    <a href="#" class="sidebar-toggle" data-toggle="push-menu" role="button">
+      <span class="sr-only">Toggle navigation</span>
+    </a>
+
+    <!-- Navbar Right Menu -->
+    <div class="navbar-custom-menu">
+      <ul class="nav navbar-nav">
+
+        <!-- Balances header -->
+        <li class="dropdown user user-menu">
+          <a href="{{ url_for('index') }}">
+            <span class="hidden-xs" id="balance-header"></span>
+          </a>
+        </li>
+
+        <!-- BTC Balances -->
+        <li class="dropdown user user-menu">
+          <a href="{{ url_for('index') }}">
+            <span class="hidden-xs" id="balance_btc-header"></span>
+          </a>
+        </li>
+
+        <!-- USD Balances -->
+        <li class="dropdown user user-menu">
+          <a href="{{ url_for('index') }}">
+            <span class="hidden-xs" id="balance_usd-header"></span>
+          </a>
+        </li>
+
+        <!-- Blank -->
+        <li class="dropdown user user-menu">
+          <a data-toggle="dropdown">
+            <span class="hidden-xs"></span>
+          </a>
+        </li>
+
+        <!-- Blank -->
+        <li class="dropdown user user-menu">
+          <a data-toggle="dropdown">
+            <span class="hidden-xs"></span>
+          </a>
+        </li>
+
+        <!-- Price -->
+        <li class="dropdown user user-menu">
+          <a href="{{ url_for('trade') }}">
+            <span class="hidden-xs" id="last-header"></span>
+          </a>
+        </li>
+
+        <!-- Blank -->
+        <li class="dropdown user user-menu">
+          <a data-toggle="dropdown">
+            <span class="hidden-xs"></span>
+          </a>
+        </li>
+
+        <!-- Blank -->
+        <li class="dropdown user user-menu">
+          <a data-toggle="dropdown">
+            <span class="hidden-xs"></span>
+          </a>
+        </li>
+
+        <!-- Logout -->
+        <li class="dropdown user user-menu">
+          <a href="{{ url_for('logout') }}">
+            <span class="hidden-xs"><strong>Logout</strong></span>
+          </a>
+        </li>
+
+      </ul>
+    </div>
+  </nav>
+
   </header>
   <!-- Left side column. contains the logo and sidebar -->
   <aside class="main-sidebar">
