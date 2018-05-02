@@ -3,6 +3,7 @@ from flask import render_template, flash, redirect, url_for, request, \
                   jsonify, session
 from app.forms import LoginForm, RegistrationForm, TradeForm
 from app.models import User, Balance, Trade, Transfer
+from app.tables import Table
 from werkzeug.urls import url_parse
 from app import app, db
 
@@ -55,9 +56,12 @@ def register():
         balances = Balance(balance_btc=0, balance_usd=500000, user_id=user.id)
         db.session.add_all([transfer, balances])
         db.session.commit()
-        flash('You have successfully registered - please log in')
+        message = 'You have successfully registered - please log in'
         return redirect(url_for('login'))
-    return render_template('register.html', title='Register', form=form)
+    else:
+        message = ''
+    return render_template('register.html', title='Register', form=form,
+                           message=message)
 
 
 @app.route('/')
@@ -66,10 +70,9 @@ def register():
 def index():
     user = current_user
     balances = Balance.query.filter_by(user_id=user.id).first()
-    trades = Trade.query.filter_by(user_id=user.id).first()
-    transfers = Transfer.query.filter_by(user_id=user.id).first()
+    table = Table(user, 6)
     return render_template('index.html', user=user, balances=balances,
-                           trades=trades, transfers=transfers)
+                           table=table)
 
 
 @app.route('/trade', methods=['GET', 'POST'])
@@ -84,10 +87,8 @@ def trade():
         price = session['price']
         total = price * amount
         session.pop('price', None)
-        if (tx_type == 'Buy' and balances.balance_usd > total) or \
-           (tx_type == 'Sell' and balances.balance_btc > amount):
-            trade = Trade(tx_type=tx_type, amount=amount, price=price,
-                          total=total, user_id=user.id)
+        if (tx_type == 'Buy' and balances.balance_usd >= total) or \
+           (tx_type == 'Sell' and balances.balance_btc >= amount):
             if tx_type == 'Buy':
                 new_balance_btc = balances.balance_btc + amount
                 new_balance_usd = balances.balance_usd - total
@@ -95,6 +96,9 @@ def trade():
                 new_balance_btc = balances.balance_btc - amount
                 new_balance_usd = balances.balance_usd + total
             db.session.delete(balances)
+            db.session.commit()
+            trade = Trade(tx_type=tx_type, amount=amount, price=price,
+                          total=total, user_id=user.id)
             new_balances = Balance(balance_btc=new_balance_btc, 
                                    balance_usd=new_balance_usd, 
                                    user_id=user.id)
@@ -109,7 +113,15 @@ def trade():
 
 
 @app.route('/get_price')
+@login_required
 def add_numbers():
     price = request.args.get('price', 0, type=float)
     session['price'] = price
     return jsonify(result=price)
+
+
+@app.route('/history')
+def history():
+    user = current_user
+    table = Table(user)
+    return render_template('history.html', user=user, table=table)

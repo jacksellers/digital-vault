@@ -60,7 +60,7 @@
                 {% endfor %}
 
                 <div class="wrap-input101 validate-input m-b-10" data-validate = "Please enter a valid number">
-                  {{ form.btc_amount(id="trade-amount", class="input101", style="background-color:#e3eeec", placeholder="Amount (BTC)", size=36) }}
+                  {{ form.btc_amount(id="trade-amount", class="input101", value="", autocomplete="off", style="background-color:#e3eeec", placeholder="Amount (BTC)", size=36) }}
                   {% for error in form.btc_amount.errors %}
                     <span style="color: red;">[{{ error }}]</span>
                   {% endfor %}
@@ -86,61 +86,61 @@
         <!-- ./col -->
 
         <script>
-            $(document).ready(function() {
-              var ws = new WebSocket('wss://api.bitfinex.com/ws/');
-              ws.onopen = function() {
-                ws.send(JSON.stringify( {
-                  "event":"subscribe", "channel":"ticker", "pair":"tBTCUSD"
-                }));
-              };
-              ws.onmessage = function(msg) {
-                var response = JSON.parse(msg.data);
-                var responseRaw = msg.data;
-                var hb = response[1];
-                if (hb != "hb") {
-                  var previousLast = parseFloat($('#trade-price').text().substring(1).replace(/,/g, ''));
-                  var last = Math.round(response[7]);
-                  const numberWithCommas = function(x) {
-                    return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-                  }
-                  $('#trade-price').val("Price: $" + numberWithCommas(last));
-                  $.getJSON($SCRIPT_ROOT + '/get_price', {
-                    price: last,
-                  });
-                }
-              };
-            });
-          </script>
-
-          <script>
-            $(document).ready(function() {
-              $("#trade-amount").keyup(function() {
-                var tradeAmount = $("#trade-amount").val();
-                var lastNumber = $("#trade-price").val().replace('Price: ', '');
-                var last = parseFloat(lastNumber.substring(1).replace(/,/g, ''));
-                var tradeTotal = tradeAmount * last;
+          $(document).ready(function() {
+            var ws = new WebSocket('wss://api.bitfinex.com/ws/');
+            ws.onopen = function() {
+              ws.send(JSON.stringify( {
+                "event":"subscribe", "channel":"ticker", "pair":"tBTCUSD"
+              }));
+            };
+            ws.onmessage = function(msg) {
+              var response = JSON.parse(msg.data);
+              var responseRaw = msg.data;
+              var hb = response[1];
+              if (hb != "hb") {
+                var previousLast = parseFloat($('#trade-price').text().substring(1).replace(/,/g, ''));
+                var last = Math.round(response[7]);
                 const numberWithCommas = function(x) {
                   return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
                 }
-                $('#trade-total').val("Total: $" + numberWithCommas(tradeTotal));
-              });
-            });
-          </script>
+                $('#trade-price').val("Price: $" + numberWithCommas(last));
+                $.getJSON($SCRIPT_ROOT + '/get_price', {
+                  price: last,
+                });
+              }
+            };
+          });
+        </script>
 
-          <script>
-            $(document).ready(function() {
-              $("input[name='option']").change(function() {
-                var tradeValue = $('input[name=option]:checked').val();
-                if (tradeValue == "Buy") {
-                  $('#trade-price').css("background-color", "#809688");
-                  $('#trade-total').css("background-color", "#809688");
-                } else {
-                  $('#trade-price').css("background-color", "#927070");
-                  $('#trade-total').css("background-color", "#927070");
-                }
-              });
+        <script>
+          $(document).ready(function() {
+            $("#trade-amount").keyup(function() {
+              var tradeAmount = $("#trade-amount").val();
+              var lastNumber = $("#trade-price").val().replace('Price: ', '');
+              var last = parseFloat(lastNumber.substring(1).replace(/,/g, ''));
+              var tradeTotal = tradeAmount * last;
+              const numberWithCommas = function(x) {
+                return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+              }
+              $('#trade-total').val("Total: $" + numberWithCommas(tradeTotal));
             });
-          </script>
+          });
+        </script>
+
+        <script>
+          $(document).ready(function() {
+            $("input[name='option']").change(function() {
+              var tradeValue = $('input[name=option]:checked').val();
+              if (tradeValue == "Buy") {
+                $('#trade-price').css("background-color", "#809688");
+                $('#trade-total').css("background-color", "#809688");
+              } else {
+                $('#trade-price').css("background-color", "#927070");
+                $('#trade-total').css("background-color", "#927070");
+              }
+            });
+          });
+        </script>
 
       </div>
       <!-- /.row -->

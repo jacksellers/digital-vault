@@ -16,7 +16,7 @@ class User(UserMixin, db.Model):
     transfers = db.relationship('Transfer', backref='client', lazy='dynamic')
 
     def __repr__(self):
-        return '{}: {} {} @{}'.format(
+        return '({}: {} {} @{})'.format(
             self.id, self.first_name, self.last_name, self.username)
 
     def set_password(self, password):
@@ -33,7 +33,7 @@ class Balance(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
 
     def __repr__(self):
-        return '{}: Balance (BTC): {}, Balance (USD): {}, User ID: {}'.format(
+        return '({}: Balance (BTC): {}, Balance (USD): {}, User ID: {})'.format(
             self.id, self.balance_btc, self.balance_usd, self.user_id)
 
 
@@ -47,7 +47,7 @@ class Trade(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
 
     def __repr__(self):
-        return '{}: Timestamp: {}, Type: {}, Amount: {}, User ID: {}'.format(
+        return '({}: Timestamp: {}, Type: {}, Amount: {}, User ID: {})'.format(
             self.id, self.timestamp, self.tx_type, self.amount, self.user_id)
 
 
@@ -61,9 +61,8 @@ class Transfer(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
 
     def __repr__(self):
-        return '''{}: Timestamp: {}, Type: {}, Currency: {}, Amount: {}, 
-    User ID: {}'''.format(self.id, self.timestamp, self.tx_type, 
-                          self.currency, self.amount, self.user_id)
+        return '({}: Timestamp: {}, Type: {}, Currency: {}, Amount: {}, User ID: {})'.format(
+            self.id, self.timestamp, self.tx_type, self.currency, self.amount, self.user_id)
 
 
 @login.user_loader

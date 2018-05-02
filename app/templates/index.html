@@ -80,7 +80,7 @@
                       var pnlUSD = balance - 500000 + (0 * price); // REPLACE '0' WITH NET DEPOSITS & WITHDRAWALS (see spreadsheet)
                       var pnlChange = pnlUSD / 500000;
                       var pnlPercentage = (pnlChange * 100).toFixed(2);
-                      $('#balance_btc').html("<strong>" + numberWithCommas({{ balances.balance_btc }}) + "</strong> <sub>BTC </sub><strong>(" + numberWithCommas(usd_equivalent) + " </strong><sub>USD</sub><strong>)</strong>");
+                      $('#balance_btc').html("<strong>" + numberWithCommas({{ balances.balance_btc }}) + "</strong> <sub>BTC </sub><strong>(&#8771; " + numberWithCommas(usd_equivalent) + " </strong><sub>USD</sub><strong>)</strong>");
                       $('#balance_usd').html("<strong>" + numberWithCommas({{ balances.balance_usd }}) + "</strong> <sub>USD</sub>");
                       $('#balance_total').html("<strong>" + numberWithCommas(balance) + " </strong><sub>USD (total)</sub>");
                       $('#pnlUSD').html("<strong>Total PnL: " + numberWithCommas(pnlUSD) + " </strong><sub>USD</sub>")
@@ -122,7 +122,7 @@
                 $("#rss-feeds").rss("https://www.coindesk.com/feed/",
                 {
                   limit: 3,
-                  entryTemplate: '<li><a href="{url}" class="rss-link">{title}</a></li>'
+                  entryTemplate: '<li><a href="{url}" class="rss-link" target="_blank">{title}</a></li>'
                 });
               });
               </script>
@@ -142,9 +142,7 @@
               <h3 class="box-title"><strong>Recent activity</strong></h3>
 
               <div class="box-tools pull-right">
-                <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i>
-                </button>
-                <button type="button" class="btn btn-box-tool" data-widget="remove"><i class="fa fa-times"></i></button>
+                <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
               </div>
             </div>
             <!-- /.box-header -->
@@ -155,67 +153,35 @@
                   <tr>
                     <th>ID</th>
                     <th>Date</th>
+                    <th>Time</th>
                     <th>Type</th>
                     <th>Amount</th>
                   </tr>
                   </thead>
                   <tbody>
-                  <tr>
-                    <td><a href="https://blockchain.info/tx/5452b698399278869d272459e0b4da706448f40d0efc47b7059b5d4883dcde19" class="id-link">W09842</a></td>
-                    <td>21-Mar-2018</td>
-                    <td><span class="label label-success">Withdrawal</span></td>
-                    <td>
-                      <div class="sparkbar" data-color="#00a65a" data-height="20">10 BTC</div>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td><a href="pages/examples/invoice.html" class="id-link">B01668</a></td>
-                    <td>16-Mar-2018</td>
-                    <td><span class="label label-warning">Buy</span></td>
-                    <td>
-                      <div class="sparkbar" data-color="#f39c12" data-height="20">5 BTC @ $8,189</div>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td><a href="pages/examples/invoice.html" class="id-link">S07429</a></td>
-                    <td>11-Mar-2018</td>
-                    <td><span class="label label-danger">Sell</span></td>
-                    <td>
-                      <div class="sparkbar" data-color="#f56954" data-height="20">15 BTC @ $9,602</div>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td><a href="pages/examples/invoice.html" class="id-link">B05099</a></td>
-                    <td>11-Mar-2018</td>
-                    <td><span class="label label-warning">Buy</span></td>
-                    <td>
-                      <div class="sparkbar" data-color="#00c0ef" data-height="20">25 BTC @ $8,700</div>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td><a href="pages/examples/invoice.html" class="id-link">S01848</a></td>
-                    <td>04-Mar-2018</td>
-                    <td><span class="label label-danger">Sell</span></td>
-                    <td>
-                      <div class="sparkbar" data-color="#f39c12" data-height="20">5 BTC @ $11,460</div>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td><a href="pages/examples/invoice.html" class="id-link">B07429</a></td>
-                    <td>01-Mar-2018</td>
-                    <td><span class="label label-warning">Buy</span></td>
-                    <td>
-                      <div class="sparkbar" data-color="#f56954" data-height="20">10 BTC @ $10,505</div>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td><a href="pages/examples/invoice.html" class="id-link">D09842</a></td>
-                    <td>01-Mar-2018</td>
-                    <td><span class="label label-success">Deposit</span></td>
-                    <td>
-                      <div class="sparkbar" data-color="#00a65a" data-height="20">$1,000,000</div>
-                    </td>
-                  </tr>
+
+                  {% for row in table %}
+                    <tr>
+                      {% if row[5] != '' %}
+                        <td><a href={{ "https://blockchain.info/tx/" + row[6] }} class="id-link">{{ row[0] }}</a></td>
+                      {% else %}
+                        <td><a class="id-link">{{ row[0] }}</a></td>
+                      {% endif %}
+                      <td>{{ row[2] }}</td>
+                      <td>{{ row[3] }}</td>
+                      {% if row[4] == 'Buy' %}
+                        <td><span class="label label-warning">{{ row[4] }}</span></td>
+                      {% elif row[4] == 'Sell' %}
+                        <td><span class="label label-danger">{{ row[4] }}</span></td>
+                      {% else %}
+                        <td><span class="label label-success">{{ row[4] }}</span></td>
+                      {% endif %}
+                      <td>
+                        <div class="sparkbar" data-color="#00a65a" data-height="20">{{ row[5] }}</div>
+                      </td>
+                    </tr>
+                  {% endfor %}
+
                   </tbody>
                 </table>
               </div>
@@ -223,7 +189,7 @@
             </div>
             <!-- /.box-body -->
             <div class="box-footer clearfix">
-              <a href="javascript:void(0)" class="btn btn-sm btn-default btn-flat pull-right"><strong>View All</strong></a>
+              <a href="{{ url_for('history') }}" class="btn btn-sm btn-default btn-flat pull-right"><strong>View All</strong></a>
             </div>
             <!-- /.box-footer -->
           </div>

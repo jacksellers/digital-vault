@@ -29,17 +29,13 @@
 		<div class="container-login100" style="background-color: black;">
 			<div class="wrap-login100 p-t-190 p-b-30">
 
-                {% with messages = get_flashed_messages() %}
-                {% if messages %}
+                {% if message is defined %}
                 <ul>
-                    {% for message in messages %}
                     <li style="color: white;"><strong>{{ message }}</strong></li>
-                    {% endfor %}
 				</ul>
 				<br>
 				<br>
                 {% endif %}
-                {% endwith %}
 
                 {% block content %}{% endblock %}
 

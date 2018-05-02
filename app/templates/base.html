@@ -34,6 +34,8 @@
   <link rel="stylesheet" href="static/bower_components/bootstrap-daterangepicker/daterangepicker.css">
   <!-- bootstrap wysihtml5 - text editor -->
   <link rel="stylesheet" href="plugins/bootstrap-wysihtml5/bootstrap3-wysihtml5.css">
+  <!-- Tab icon -->
+  <link rel="shortcut icon" href="{{ url_for('static', filename='img/favicon-32x32.png') }}">
 
   <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
   <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
@@ -85,7 +87,7 @@
         <li><a href="{{ url_for('index') }}"><i class="fa fa-dashboard"></i> <span>Dashboard</span></a></li>
         <li><a href="{{ url_for('trade') }}"><i class="fa fa-laptop"></i> <span>Trade</span></a></li>
         <li><a href=""><i class="fa fa-share"></i> <span>Funding</span></a></li>
-        <li><a href=""><i class="fa fa-calendar"></i> <span>History</span></a></li>
+        <li><a href="{{ url_for('history') }}"><i class="fa fa-calendar"></i> <span>History</span></a></li>
         <li><a href=""><i class="fa fa-book"></i> <span>API</span></a></li>
       </ul>
     </section>
