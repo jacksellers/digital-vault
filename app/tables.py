@@ -48,11 +48,22 @@ def Table(user, rows='all'):
     table = []
     for event in trades + transfers:
         if event.tx_type in ['Buy', 'Sell']:
-            table.append([format_id(event.id, event.tx_type), event.timestamp, format_date(event.timestamp), format_time(event.timestamp), event.tx_type, format_amount(event.amount, price=event.price), ''])
+            table.append([format_id(event.id, event.tx_type), event.timestamp,
+                          format_date(event.timestamp),
+                          format_time(event.timestamp), event.tx_type,
+                          format_amount(event.amount, price=event.price), ''])
         elif event.currency == 'BTC':
-            table.append([format_id(event.id, event.tx_type), event.timestamp, format_date(event.timestamp), format_time(event.timestamp), event.tx_type, format_amount(event.amount, currency=event.currency), event.tx_id])
+            table.append([format_id(event.id, event.tx_type), event.timestamp,
+                          format_date(event.timestamp),
+                          format_time(event.timestamp), event.tx_type,
+                          format_amount(event.amount, currency=event.currency),
+                          event.tx_id])
         else:
-            table.append([format_id(event.id, event.tx_type), event.timestamp, format_date(event.timestamp), format_time(event.timestamp), event.tx_type, format_amount(event.amount, currency=event.currency), ''])
+            table.append([format_id(event.id, event.tx_type), event.timestamp,
+                          format_date(event.timestamp),
+                          format_time(event.timestamp), event.tx_type,
+                          format_amount(event.amount, currency=event.currency),
+                          ''])
     table = sorted(table, key=itemgetter(1), reverse=True)
     if rows == 'all':
         return table
