@@ -71,7 +71,6 @@
         };
         ws.onmessage = function(msg) {
           var response = JSON.parse(msg.data);
-          var responseRaw = msg.data;
           var hb = response[1];
           if (hb != "hb") {
             var previousLast = parseFloat($('#last').text().substring(1).replace(/,/g, ''));
@@ -216,7 +215,7 @@
         <li><a href="{{ url_for('trade') }}"><i class="fa fa-laptop"></i> <span>Trade</span></a></li>
         <li><a href=""><i class="fa fa-share"></i> <span>Funding</span></a></li>
         <li><a href="{{ url_for('history') }}"><i class="fa fa-calendar"></i> <span>History</span></a></li>
-        <li><a href=""><i class="fa fa-book"></i> <span>API</span></a></li>
+        <li><a href="{{ url_for('api') }}"><i class="fa fa-book"></i> <span>API</span></a></li>
       </ul>
     </section>
     <!-- /.sidebar -->

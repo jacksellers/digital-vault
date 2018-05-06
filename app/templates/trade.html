@@ -5,149 +5,199 @@
   <div class="content-wrapper">
     <!-- Content Header (Page header) -->
     <section class="content-header">
-      <h1>
-        <strong>Trade</strong>
-      </h1>
+      <h1>Trade</h1>
     </section>
 
     <!-- Main content -->
-    <div class="content">
-
-        <!-- TradingView Widget BEGIN -->
-        <div class="tradingview-widget-container">
-                <div id="tradingview_c379d"></div>
-                <div class="tradingview-widget-copyright"></div>
-                <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
-                <script type="text/javascript">
-                new TradingView.widget( {
-                "autosize": true,
-                "symbol": "BITFINEX:BTCUSD",
-                "interval": "D",
-                "timezone": "Etc/UTC",
-                "theme": "Dark",
-                "style": "1",
-                "locale": "uk",
-                "toolbar_bg": "#f1f3f6",
-                "enable_publishing": false,
-                "allow_symbol_change": true,
-                "save_image": false,
-                "hideideas": true,
-                "container_id": "tradingview_c379d"
-                });
-                </script>
-            </div>
-            <!-- TradingView Widget END -->
-    <!-- Main content -->
     <section class="content">
-      <!-- Small boxes (Stat box) -->
+
+      <!-- Main row -->
       <div class="row">
-        <div class="col-lg-3 col-xs-6">
-          <!-- small box -->
-          <div class="small-box bg-aqua">
-            <div class="inner">
-              <h3>New order</h3>
-              
-              <form class="login101-form validate-form" action="" method="post">
-                {{ form.hidden_tag() }}
-
-                {% for subfield in form.option %}
-                  {{ subfield }}
-                  <h4><strong>{{ subfield.label }}</strong></h4>
-                  <br>
-                {% endfor %}
-                {% for error in form.option.errors %}
-                  <span style="color: red;">[{{ error }}]</span>
-                {% endfor %}
-
-                <div class="wrap-input101 validate-input m-b-10" data-validate = "Please enter a valid number">
-                  {{ form.btc_amount(id="trade-amount", class="input101", value="", autocomplete="off", style="background-color:#e3eeec", placeholder="Amount (BTC)", size=36) }}
-                  {% for error in form.btc_amount.errors %}
-                    <span style="color: red;">[{{ error }}]</span>
-                  {% endfor %}
-                </div>
-
-                <div class="wrap-input101 validate-input m-b-10">
-                  {{ form.price(id="trade-price", class="input101", value="", style="background-color:#979797", size=36, disabled=True) }}
-                </div>
-
-                <div class="wrap-input101 validate-input m-b-10" data-validate = "Please enter a valid number">
-                  {{ form.total(id="trade-total", class="input101", value="Total: $0", style="background-color:#979797", size=36, disabled=True) }}
-                </div>
-
-                <div class="container-login101-form-btn p-t-10">
-                  {{ form.trade(class="login101-form-btn") }}
-                </div>
-              </form>
-
-              <h4 style="color: white;"><strong>{{ message }}</strong></h4>
+        <!-- Left col -->
+        <div class="col-md-8">
+          
+          
+        <!-- TradingView Widget BEGIN -->
+        <div class="box box-success">
+          <div id="tradingview_e07e6" class="box-body no-padding" style="height: 600px;"></div>
+            <div class="row">
+              <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
+              <script type="text/javascript">
+                new TradingView.widget( {
+                  "autosize": true,
+                  "symbol": "BITFINEX:BTCUSD",
+                  "interval": "D",
+                  "timezone": "Etc/UTC",
+                  "theme": "Dark",
+                  "style": "1",
+                  "locale": "en",
+                  "toolbar_bg": "#f1f3f6",
+                  "enable_publishing": false,
+                  "hide_top_toolbar": false,
+                  "save_image": false,
+                  "container_id": "tradingview_e07e6"
+                });
+              </script>
             </div>
+        </div>
+        <!-- TradingView Widget END -->
+
+          <!-- /.row -->
+        </div>
+        <!-- /.col -->
+
+
+        
+        <div class="col-md-4">
+            <div class="box box-default bg-aqua">
+                <div class="box-header with-border">
+                  <h3 class="box-title" style="color:white;"><strong>New Order</strong></h3>
+                </div>
+                <!-- /.box-header -->
+                <div class="box-body" style="height: 343px;">
+                  <form class="login101-form validate-form" action="" method="post">
+                    {{ form.hidden_tag() }}
+    
+                    {% for subfield in form.option %}
+                      {{ subfield }}
+                      <h4><strong>{{ subfield.label }}</strong></h4>
+                      <br>
+                    {% endfor %}
+                    {% for error in form.option.errors %}
+                      <span style="color: red;">[{{ error }}]</span>
+                    {% endfor %}
+    
+                    <div class="wrap-input101 validate-input m-b-10" data-validate = "Please enter a valid number">
+                      {{ form.btc_amount(id="trade-amount", class="input101", value="", autocomplete="off", style="background-color:#e3eeec", placeholder="Amount (BTC)", size=36) }}
+                      {% for error in form.btc_amount.errors %}
+                        <span style="color: red;">[{{ error }}]</span>
+                      {% endfor %}
+                    </div>
+    
+                    <div class="wrap-input101 validate-input m-b-10">
+                      {{ form.price(id="trade-price", class="input101", value="", style="background-color:#979797", size=36, disabled=True) }}
+                    </div>
+    
+                    <div class="wrap-input101 validate-input m-b-10" data-validate = "Please enter a valid number">
+                      {{ form.total(id="trade-total", class="input101", value="Total: $0", style="background-color:#979797", size=36, disabled=True) }}
+                    </div>
+    
+                    <div class="container-login101-form-btn p-t-10">
+                      {{ form.trade(class="login101-form-btn") }}
+                    </div>
+                  </form>
+                  {% with messages = get_flashed_messages() %}
+                    {% if messages %}
+                      {% for message in messages %}
+                        <h4 style="color: white;" align="center">{{ message }}</h4>
+                      {% endfor %}
+                    {% endif %}
+                  {% endwith %}
+                </div>
+                <!-- /.box-body -->
+
+                <script>
+                  $(document).ready(function() {
+                    var ws = new WebSocket('wss://api.bitfinex.com/ws/');
+                    ws.onopen = function() {
+                      ws.send(JSON.stringify( {
+                        "event":"subscribe", "channel":"ticker", "pair":"tBTCUSD"
+                      }));
+                    };
+                    ws.onmessage = function(msg) {
+                      var response = JSON.parse(msg.data);
+                      var hb = response[1];
+                      if (hb != "hb") {
+                        var previousLast = parseFloat($('#trade-price').text().substring(1).replace(/,/g, ''));
+                        var bid = Math.round(response[1]);
+                        var ask = Math.round(response[3]);
+                        var last = Math.round(response[7]);
+                        const numberWithCommas = function(x) {
+                          return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+                        }
+                        $('#trade-price').val("Price: $" + numberWithCommas(last));
+                        $('#ask-price').text("$" + numberWithCommas(ask));
+                        $('#bid-price').text("$" + numberWithCommas(bid));
+                        $.getJSON($SCRIPT_ROOT + '/get_price', {
+                          price: last,
+                        });
+                      }
+                    };
+                  });
+                </script>
+        
+                <script>
+                  $(document).ready(function() {
+                    $("#trade-amount").keyup(function() {
+                      var tradeAmount = $("#trade-amount").val();
+                      var lastNumber = $("#trade-price").val().replace('Price: ', '');
+                      var last = parseFloat(lastNumber.substring(1).replace(/,/g, ''));
+                      var tradeTotal = tradeAmount * last;
+                      const numberWithCommas = function(x) {
+                        return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+                      }
+                      $('#trade-total').val("Total: $" + numberWithCommas(tradeTotal));
+                    });
+                  });
+                </script>
+        
+                <script>
+                  $(document).ready(function() {
+                    $("input[name='option']").change(function() {
+                      var tradeValue = $('input[name=option]:checked').val();
+                      if (tradeValue == "Buy") {
+                        $('#trade-price').css("background-color", "#809688");
+                        $('#trade-total').css("background-color", "#809688");
+                      } else {
+                        $('#trade-price').css("background-color", "#927070");
+                        $('#trade-total').css("background-color", "#927070");
+                      }
+                    });
+                  });
+                </script>
+
+                <div class="box-footer no-padding">
+
+                </div>
+                <!-- /.footer -->
+              </div>
+              <!-- /.box -->
+          <!-- Info Boxes Style 2 -->
+          <div class="info-box bg-yellow">
+            <span class="info-box-icon"><h3>Asks</h3></span>
+
+            <div class="info-box-content">
+              <span class="info-box-text">Volume</span>
+              <span class="info-box-number">5,200</span>
+
+              <div class="progress">
+                <div class="progress-bar" style="width: 50%"></div>
+              </div>
+              <span id="ask-price" class="progress-description"></span>
+            </div>
+            <!-- /.info-box-content -->
+          </div>
+          <!-- /.info-box -->
+          <div class="info-box bg-green">
+            <span class="info-box-icon"><h3>Bids</h3></span>
+
+            <div class="info-box-content">
+              <span class="info-box-text">Volume</span>
+              <span class="info-box-number">92,050</span>
+
+              <div class="progress">
+                <div class="progress-bar" style="width: 20%"></div>
+              </div>
+              <span id="bid-price" class="progress-description"></span>
+            </div>
+            <!-- /.info-box-content -->
           </div>
         </div>
-        <!-- ./col -->
-
-        <script>
-          $(document).ready(function() {
-            var ws = new WebSocket('wss://api.bitfinex.com/ws/');
-            ws.onopen = function() {
-              ws.send(JSON.stringify( {
-                "event":"subscribe", "channel":"ticker", "pair":"tBTCUSD"
-              }));
-            };
-            ws.onmessage = function(msg) {
-              var response = JSON.parse(msg.data);
-              var responseRaw = msg.data;
-              var hb = response[1];
-              if (hb != "hb") {
-                var previousLast = parseFloat($('#trade-price').text().substring(1).replace(/,/g, ''));
-                var last = Math.round(response[7]);
-                const numberWithCommas = function(x) {
-                  return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-                }
-                $('#trade-price').val("Price: $" + numberWithCommas(last));
-                $.getJSON($SCRIPT_ROOT + '/get_price', {
-                  price: last,
-                });
-              }
-            };
-          });
-        </script>
-
-        <script>
-          $(document).ready(function() {
-            $("#trade-amount").keyup(function() {
-              var tradeAmount = $("#trade-amount").val();
-              var lastNumber = $("#trade-price").val().replace('Price: ', '');
-              var last = parseFloat(lastNumber.substring(1).replace(/,/g, ''));
-              var tradeTotal = tradeAmount * last;
-              const numberWithCommas = function(x) {
-                return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-              }
-              $('#trade-total').val("Total: $" + numberWithCommas(tradeTotal));
-            });
-          });
-        </script>
-
-        <script>
-          $(document).ready(function() {
-            $("input[name='option']").change(function() {
-              var tradeValue = $('input[name=option]:checked').val();
-              if (tradeValue == "Buy") {
-                $('#trade-price').css("background-color", "#809688");
-                $('#trade-total').css("background-color", "#809688");
-              } else {
-                $('#trade-price').css("background-color", "#927070");
-                $('#trade-total').css("background-color", "#927070");
-              }
-            });
-          });
-        </script>
-
+        <!-- /.col -->
       </div>
       <!-- /.row -->
-      <!-- Main row -->
-    </div>
-
     </section>
     <!-- /.content -->
   </div>
+  <!-- /.content-wrapper -->
 {% endblock %}

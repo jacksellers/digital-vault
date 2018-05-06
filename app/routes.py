@@ -3,8 +3,9 @@ from flask import render_template, flash, redirect, url_for, request, \
                   jsonify, session
 from app.forms import LoginForm, RegistrationForm, TradeForm
 from app.models import User, Balance, Trade, Transfer
-from app.tables import Table
+from app.tables import clean, grid, export
 from werkzeug.urls import url_parse
+import flask_excel as excel
 from app import app, db
 
 
@@ -18,6 +19,7 @@ def page_not_found(e):
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
+    print('SESSION: ', session)
     if current_user.is_authenticated:
         return redirect(url_for('index'))
     form = LoginForm()
@@ -36,12 +38,14 @@ def login():
 
 @app.route('/logout')
 def logout():
+    session.clear()
     logout_user()
     return redirect(url_for('login'))
 
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
+    print('SESSION: ', session)
     if current_user.is_authenticated:
         return redirect(url_for('index'))
     form = RegistrationForm()
@@ -56,12 +60,9 @@ def register():
         balances = Balance(balance_btc=0, balance_usd=500000, user_id=user.id)
         db.session.add_all([transfer, balances])
         db.session.commit()
-        message = 'You have successfully registered - please log in'
+        flash('You have successfully registered - please log in')
         return redirect(url_for('login'))
-    else:
-        message = ''
-    return render_template('register.html', title='Register', form=form,
-                           message=message)
+    return render_template('register.html', title='Register', form=form)
 
 
 @app.route('/')
@@ -70,7 +71,7 @@ def register():
 def index():
     user = current_user
     balances = Balance.query.filter_by(user_id=user.id).first()
-    table = Table(user, 6)
+    table = grid(user, 6)
     return render_template('index.html', user=user, balances=balances,
                            table=table)
 
@@ -105,13 +106,14 @@ def trade():
             db.session.add_all([trade, new_balances])
             db.session.commit()
             balances = Balance.query.filter_by(user_id=user.id).first()
-            message = 'Your trade was successful'  # ADD ALL TRADE DETAILS !
+            flash('Your {} trade was successful - {} BTC @ ${}'.format(
+                  tx_type.lower(), clean(amount), clean(price)))
         else:
-            message = 'Your trade was unsuccessful - insufficient funds'
-    else:
-        message = ''
-    return render_template('trade.html', user=user, balances=balances,
-                           form=form, message=message)
+            flash('Your {} trade was unsuccessful - insufficient funds'.format(
+                  tx_type.lower()))
+        return redirect(url_for('trade'))
+    return render_template('trade.html', user=user, balances=balances, 
+                           form=form)
 
 
 @app.route('/get_price')
@@ -123,9 +125,23 @@ def add_numbers():
 
 
 @app.route('/history')
+@login_required
 def history():
     user = current_user
     balances = Balance.query.filter_by(user_id=user.id).first()
-    table = Table(user)
+    table = grid(user)
     return render_template('history.html', user=user, balances=balances,
                            table=table)
+
+
+@app.route('/history/xlsx', methods=['GET'])
+@login_required
+def history_xlsx():
+    user = current_user
+    table = export(user)
+    return excel.make_response_from_array(table, 'xlsx', file_name='history')
+
+
+@app.route('/api', methods=['GET', 'POST'])
+def api():
+    return 'api'

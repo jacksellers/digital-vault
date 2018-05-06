@@ -5,9 +5,7 @@
   <div class="content-wrapper">
     <!-- Content Header (Page header) -->
     <section class="content-header">
-      <h1>
-        <strong>History</strong>
-      </h1>
+      <h1>History</h1>
     </section>
 
     <!-- Main content -->
@@ -40,7 +38,7 @@
                   {% for row in table %}
                     <tr>
                       {% if row[6] != '' %}
-                        <td><a href={{ "https://blockchain.info/tx/" + row[6] }} class="id-link">{{ row[0] }}</a></td>
+                        <td><a href={{ "https://blockchain.info/tx/" + row[6] }} class="id-link"><u>{{ row[0] }}</u></a></td>
                       {% else %}
                         <td><a class="id-link">{{ row[0] }}</a></td>
                       {% endif %}
@@ -66,7 +64,7 @@
             </div>
             <!-- /.box-body -->
             <div class="box-footer clearfix">
-              <a href="" class="btn btn-sm btn-default btn-flat pull-right"><strong>Export to CSV   </strong><i style="color:black" class="fa fa-file-text-o"></i></a>
+              <a href="{{ url_for('history_xlsx') }}" class="btn btn-sm btn-default btn-flat pull-right"><strong>Export to Excel   </strong><i style="color:black" class="fa fa-file-text-o"></i></a>
             </div>
             <!-- /.box-footer -->
 
