@@ -1552,12 +1552,7 @@ a:focus {
 .box.box-warning {
   border-top-color: #f39c12;
 }
-.box.box-success {
-  border-top-color: #00a65a;
-}
-.box.box-default {
-  border-top-color: #d2d6de;
-}
+
 .box.collapsed-box .box-body,
 .box.collapsed-box .box-footer {
   display: none;
@@ -4460,14 +4455,14 @@ table.text-center th {
 .alert-error,
 .label-danger,
 .modal-danger .modal-body {
-  background-color: #41322d !important;
+  background-color: #5c2828 !important;
 }
 .bg-yellow,
 .callout.callout-warning,
 .alert-warning,
 .label-warning,
 .modal-warning .modal-body {
-  background-color: #243b33 !important;
+  background-color: #265041 !important;
 }
 .bg-aqua,
 .callout.callout-info,
@@ -4489,7 +4484,7 @@ table.text-center th {
 .alert-success,
 .label-success,
 .modal-success .modal-body {
-  background-color: #343142 !important;
+  background-color: #382e64 !important;
 }
 .bg-navy {
   background-color: #001f3f !important;

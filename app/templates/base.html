@@ -210,12 +210,37 @@
       </div>
       <!-- sidebar menu: : style can be found in sidebar.less -->
       <ul class="sidebar-menu" data-widget="tree">
-        <li class="header">MAIN NAVIGATION</li>
-        <li><a href="{{ url_for('index') }}"><i class="fa fa-dashboard"></i> <span>Dashboard</span></a></li>
-        <li><a href="{{ url_for('trade') }}"><i class="fa fa-laptop"></i> <span>Trade</span></a></li>
-        <li><a href=""><i class="fa fa-share"></i> <span>Funding</span></a></li>
-        <li><a href="{{ url_for('history') }}"><i class="fa fa-calendar"></i> <span>History</span></a></li>
-        <li><a href="{{ url_for('api') }}"><i class="fa fa-book"></i> <span>API</span></a></li>
+        <li class="header"></li>
+        {% if request.path == '/index' or request.path == '/' %}
+          <li><a href="{{ url_for('index') }}"><i class="fa fa-dashboard"></i> <span><strong>Dashboard</strong></span></a></li>
+        {% else %}
+          <li><a href="{{ url_for('index') }}"><i class="fa fa-dashboard"></i> <span>Dashboard</span></a></li>
+        {% endif %}
+        {% if request.path == '/trade' %}
+          <li><a href="{{ url_for('trade') }}"><i class="fa fa-line-chart"></i> <span><strong>Trade</strong></span></a></li>
+        {% else %}
+          <li><a href="{{ url_for('trade') }}"><i class="fa fa-line-chart"></i> <span>Trade</span></a></li>
+        {% endif %}
+        {% if request.path == '/funding' %}
+          <li><a href="{{ url_for('funding') }}"><i class="fa fa-bank"></i> <span><strong>Funding</strong></span></a></li>
+        {% else %}
+          <li><a href="{{ url_for('funding') }}"><i class="fa fa-bank"></i> <span>Funding</span></a></li>
+        {% endif %}
+        {% if request.path == '/history' %}
+          <li><a href="{{ url_for('history') }}"><i class="fa fa-history"></i> <span><strong>History</strong></span></a></li>
+        {% else %}
+          <li><a href="{{ url_for('history') }}"><i class="fa fa-history"></i> <span>History</span></a></li>
+        {% endif %}
+        {% if request.path == '/explorer' %}
+          <li><a href="{{ url_for('explorer') }}"><i class="fa fa-cubes"></i> <span><strong>Explorer</strong></span></a></li>
+        {% else %}
+          <li><a href="{{ url_for('explorer') }}"><i class="fa fa-cubes"></i> <span>Explorer</span></a></li>
+        {% endif %}
+        {% if request.path == '/api' %}
+          <li><a href="{{ url_for('api') }}"><i class="fa fa-code"></i> <span><strong>API</strong></span></a></li>
+        {% else %}
+          <li><a href="{{ url_for('api') }}"><i class="fa fa-code"></i> <span>API</span></a></li>
+        {% endif %}
       </ul>
     </section>
     <!-- /.sidebar -->

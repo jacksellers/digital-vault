@@ -116,6 +116,12 @@ def trade():
                            form=form)
 
 
+@app.route('/funding', methods=['GET', 'POST'])
+@login_required
+def funding():
+    return 'funding'
+
+
 @app.route('/get_price')
 @login_required
 def add_numbers():
@@ -140,6 +146,13 @@ def history_xlsx():
     user = current_user
     table = export(user)
     return excel.make_response_from_array(table, 'xlsx', file_name='history')
+
+
+@app.route('/explorer', methods=['GET', 'POST'])
+def explorer():
+    user = current_user
+    balances = Balance.query.filter_by(user_id=user.id).first()
+    return 'explorer'
 
 
 @app.route('/api', methods=['GET', 'POST'])
