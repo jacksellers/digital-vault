@@ -101,7 +101,10 @@
                     var ws = new WebSocket('wss://api.bitfinex.com/ws/');
                     ws.onopen = function() {
                       ws.send(JSON.stringify( {
-                        "event":"subscribe", "channel":"ticker", "pair":"tBTCUSD"
+                        "event":"subscribe",
+                        "channel":"ticker",
+                        "pair":"tBTCUSD",
+                        "prec": "P0"
                       }));
                     };
                     ws.onmessage = function(msg) {
@@ -109,7 +112,7 @@
                       var hb = response[1];
                       if (hb != "hb") {
                         var previousLast = parseFloat($('#trade-price').text().substring(1).replace(/,/g, ''));
-                        var bid = Math.round(response[1]);
+                        var bid = Math.round(hb);
                         var ask = Math.round(response[3]);
                         var last = Math.round(response[7]);
                         const numberWithCommas = function(x) {
@@ -121,6 +124,70 @@
                         $.getJSON($SCRIPT_ROOT + '/get_price', {
                           price: last,
                         });
+                      }
+                    };
+                  });
+                </script>
+
+                <script>
+                  $(document).ready(function() {
+                    var ws = new WebSocket('wss://api.bitfinex.com/ws/');
+                    ws.onopen = function() {
+                      ws.send(JSON.stringify( {
+                        "event": "subscribe",
+                        "channel": "book",
+                        "pair": "BTCUSD",
+                        "prec": "P0"
+                      }));
+                    };
+                    var askVolume = 0;
+                    var bidVolume = 0;
+                    // Get data from Bitfinex, then build an orderbook Object 
+                    ws.onmessage = function(msg) {
+                      var response = JSON.parse(msg.data);
+                      // Bitcoin price
+                      var price = response[1];
+                      if (price != 'hb') {
+                        if (response.length == 4) {
+                          // number of orders at this price
+                          var count = response[2];
+                          // amount of BTC available at this price ( negative means Ask, positive Bid )
+                          var amount = response[3];
+                          const numberWithCommas = function(x) {
+                            return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+                          }
+                          if (amount != 0) {
+                            if (count != 0) {
+                              if (amount < 0) {
+                                askVolume = Math.round(askVolume - (price * amount));
+                              } else {
+                                bidVolume = Math.round(bidVolume + (price * amount));
+                              }
+                            } else {
+                              if (amount < 0) {
+                                askVolume = Math.round(askVolume + (price * amount));
+                              } else {
+                                bidVolume = Math.round(bidVolume - (price * amount));
+                              }
+                            }
+                            if (askVolume < 0) {
+                              askVolume = 0;
+                            }
+                            if (bidVolume < 0) {
+                              bidVolume = 0;
+                            }
+                            var totalVolume = askVolume + bidVolume;
+                            var askPercentage = Math.round((askVolume / totalVolume) * 100);
+                            var bidPercentage = Math.round((bidVolume / totalVolume) * 100);
+                            var askBar = askPercentage.toString() + "%"
+                            var bidBar = bidPercentage.toString() + "%"
+                            $('#ask-volume').text("$" + numberWithCommas(askVolume));
+                            $('#bid-volume').text("$" + numberWithCommas(bidVolume));
+                            $('#ask-bar').css("width", askBar);
+                            $('#bid-bar').css("width", bidBar);
+                            // alert(bidBar)
+                          }
+                        }
                       }
                     };
                   });
@@ -168,10 +235,10 @@
 
             <div class="info-box-content">
               <span class="info-box-text">Volume</span>
-              <span class="info-box-number">92,050</span>
+              <span class="info-box-number" id="ask-volume"></span>
 
               <div class="progress">
-                <div class="progress-bar" style="width: 50%"></div>
+                <div class="progress-bar" id="ask-bar"></div>
               </div>
               <span id="ask-price" class="progress-description"></span>
             </div>
@@ -183,10 +250,10 @@
 
             <div class="info-box-content">
               <span class="info-box-text">Volume</span>
-              <span class="info-box-number">5,200</span>
+              <span class="info-box-number" id="bid-volume"></span>
 
               <div class="progress">
-                <div class="progress-bar" style="width: 20%"></div>
+                <div class="progress-bar" id="bid-bar"></div>
               </div>
               <span id="bid-price" class="progress-description"></span>
             </div>

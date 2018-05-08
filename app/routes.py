@@ -106,10 +106,10 @@ def trade():
             db.session.add_all([trade, new_balances])
             db.session.commit()
             balances = Balance.query.filter_by(user_id=user.id).first()
-            flash('Your {} trade was successful - {} BTC @ ${}'.format(
+            flash('Your {} trade was executed - {} BTC @ ${}'.format(
                   tx_type.lower(), clean(amount), clean(price)))
         else:
-            flash('Your {} trade was unsuccessful - insufficient funds'.format(
+            flash('Your {} trade failed - insufficient funds'.format(
                   tx_type.lower()))
         return redirect(url_for('trade'))
     return render_template('trade.html', user=user, balances=balances, 
