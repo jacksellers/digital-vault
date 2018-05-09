@@ -101,39 +101,6 @@
                     var ws = new WebSocket('wss://api.bitfinex.com/ws/');
                     ws.onopen = function() {
                       ws.send(JSON.stringify( {
-                        "event":"subscribe",
-                        "channel":"ticker",
-                        "pair":"tBTCUSD",
-                        "prec": "P0"
-                      }));
-                    };
-                    ws.onmessage = function(msg) {
-                      var response = JSON.parse(msg.data);
-                      var hb = response[1];
-                      if (hb != "hb") {
-                        var previousLast = parseFloat($('#trade-price').text().substring(1).replace(/,/g, ''));
-                        var bid = Math.round(hb);
-                        var ask = Math.round(response[3]);
-                        var last = Math.round(response[7]);
-                        const numberWithCommas = function(x) {
-                          return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-                        }
-                        $('#trade-price').val("Price: $" + numberWithCommas(last));
-                        $('#ask-price').text("$" + numberWithCommas(ask));
-                        $('#bid-price').text("$" + numberWithCommas(bid));
-                        $.getJSON($SCRIPT_ROOT + '/get_price', {
-                          price: last,
-                        });
-                      }
-                    };
-                  });
-                </script>
-
-                <script>
-                  $(document).ready(function() {
-                    var ws = new WebSocket('wss://api.bitfinex.com/ws/');
-                    ws.onopen = function() {
-                      ws.send(JSON.stringify( {
                         "event": "subscribe",
                         "channel": "book",
                         "pair": "BTCUSD",

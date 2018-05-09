@@ -33,6 +33,10 @@ def format_amount(amount, price=None, currency=None):
         return '$' + str(clean(amount))
 
 
+def usd(x):
+    return '$' + str(clean(x))
+
+
 def clean(x):
     x_commas = '{:,}'.format(x)
     x_clean = x_commas.rstrip('0')
@@ -71,6 +75,40 @@ def grid(user, rows='all'):
         return table[:rows]
 
 
+def big_grid(user, rows='all'):
+    trades = Trade.query.filter_by(user_id=user.id).all()
+    transfers = Transfer.query.filter_by(user_id=user.id).all()
+    table = []
+    for event in trades + transfers:
+        if event.tx_type in ['Buy', 'Sell']:
+            table.append([format_id(event.id, event.tx_type), event.timestamp,
+                          format_date(event.timestamp),
+                          format_time(event.timestamp), event.tx_type,
+                          clean(event.amount), 'BTC', usd(event.price),
+                          usd(event.amount * event.price), ''])
+        elif event.currency == 'BTC':
+            table.append([format_id(event.id, event.tx_type), event.timestamp,
+                          format_date(event.timestamp),
+                          format_time(event.timestamp), event.tx_type,
+                          clean(event.amount), event.currency, '', '',
+                          event.tx_id])
+        else:
+            table.append([format_id(event.id, event.tx_type), event.timestamp,
+                          format_date(event.timestamp),
+                          format_time(event.timestamp), event.tx_type,
+                          usd(event.amount), event.currency, '',
+                          usd(event.amount), ''])
+    table = sorted(table, key=itemgetter(1), reverse=True)
+    for row in table:
+        del row[1]
+    table.insert(0, ['ID', 'Date', 'Time', 'Type', 'Amount', 'Currency',
+                     'Price', 'USD Total', 'TXID'])
+    if rows == 'all':
+        return table
+    else:
+        return table[:rows]
+
+
 def export(user, rows='all'):
     trades = Trade.query.filter_by(user_id=user.id).all()
     transfers = Transfer.query.filter_by(user_id=user.id).all()
@@ -80,23 +118,25 @@ def export(user, rows='all'):
             table.append([format_id(event.id, event.tx_type), event.timestamp,
                           format_date(event.timestamp),
                           format_time(event.timestamp), event.tx_type,
-                          format_amount(event.amount, price=event.price), ''])
+                          event.amount, 'BTC', event.price,
+                          event.amount * event.price, ''])
         elif event.currency == 'BTC':
             table.append([format_id(event.id, event.tx_type), event.timestamp,
                           format_date(event.timestamp),
                           format_time(event.timestamp), event.tx_type,
-                          format_amount(event.amount, currency=event.currency),
+                          event.amount, event.currency, '', '',
                           event.tx_id])
         else:
             table.append([format_id(event.id, event.tx_type), event.timestamp,
                           format_date(event.timestamp),
                           format_time(event.timestamp), event.tx_type,
-                          format_amount(event.amount, currency=event.currency),
+                          event.amount, event.currency, '', event.amount,
                           ''])
     table = sorted(table, key=itemgetter(1), reverse=True)
     for row in table:
         del row[1]
-    table.insert(0, ['ID', 'Date', 'Time', 'Type', 'Amount'])
+    table.insert(0, ['ID', 'Date', 'Time', 'Type', 'Amount', 'Currency',
+                     'Price', 'USD Total', 'TX_ID'])
     if rows == 'all':
         return table
     else:

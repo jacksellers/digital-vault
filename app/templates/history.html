@@ -26,33 +26,40 @@
                 <table class="table no-margin" style="font-size:16px">
                   <thead>
                   <tr>
-                    <th>ID</th>
-                    <th>Date</th>
-                    <th>Time</th>
-                    <th>Type</th>
-                    <th>Amount</th>
+                    {% for header in table[0][:8] %}
+                      <th>{{ header }}</th>
+                    {% endfor %}
                   </tr>
                   </thead>
                   <tbody>
 
-                  {% for row in table %}
+                  {% for row in table[1:] %}
                     <tr>
-                      {% if row[6] != '' %}
-                        <td><a href={{ "https://blockchain.info/tx/" + row[6] }} class="id-link"><u>{{ row[0] }}</u></a></td>
+                      {% if row[8] != '' %}
+                        <td><a href={{ "https://blockchain.info/tx/" + row[8] }} class="id-link"><u>{{ row[0] }}</u></a></td>
                       {% else %}
                         <td><a class="id-link">{{ row[0] }}</a></td>
                       {% endif %}
+                      <td>{{ row[1] }}</td>
                       <td>{{ row[2] }}</td>
-                      <td>{{ row[3] }}</td>
-                      {% if row[4] == 'Buy' %}
-                        <td><span class="label label-warning">{{ row[4] }}</span></td>
-                      {% elif row[4] == 'Sell' %}
-                        <td><span class="label label-danger">{{ row[4] }}</span></td>
+                      {% if row[3] == 'Buy' %}
+                        <td><span class="label label-warning">{{ row[3] }}</span></td>
+                      {% elif row[3] == 'Sell' %}
+                        <td><span class="label label-danger">{{ row[3] }}</span></td>
                       {% else %}
-                        <td><span class="label label-success">{{ row[4] }}</span></td>
+                        <td><span class="label label-success">{{ row[3] }}</span></td>
                       {% endif %}
                       <td>
+                        <div class="sparkbar" data-color="#00a65a" data-height="20">{{ row[4] }}</div>
+                      </td>
+                      <td>
                         <div class="sparkbar" data-color="#00a65a" data-height="20">{{ row[5] }}</div>
+                      </td>
+                      <td>
+                        <div class="sparkbar" data-color="#00a65a" data-height="20">{{ row[6] }}</div>
+                      </td>
+                      <td>
+                        <div class="sparkbar" data-color="#00a65a" data-height="20">{{ row[7] }}</div>
                       </td>
                     </tr>
                   {% endfor %}

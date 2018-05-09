@@ -3,7 +3,7 @@ from flask import render_template, flash, redirect, url_for, request, \
                   jsonify, session
 from app.forms import LoginForm, RegistrationForm, TradeForm
 from app.models import User, Balance, Trade, Transfer
-from app.tables import clean, grid, export
+from app.tables import clean, grid, big_grid, export
 from werkzeug.urls import url_parse
 import flask_excel as excel
 from app import app, db
@@ -37,6 +37,7 @@ def login():
 
 
 @app.route('/logout')
+@login_required
 def logout():
     session.clear()
     logout_user()
@@ -71,7 +72,7 @@ def register():
 def index():
     user = current_user
     balances = Balance.query.filter_by(user_id=user.id).first()
-    table = grid(user, 6)
+    table = grid(user, 5)
     return render_template('index.html', user=user, balances=balances,
                            table=table)
 
@@ -135,7 +136,7 @@ def add_numbers():
 def history():
     user = current_user
     balances = Balance.query.filter_by(user_id=user.id).first()
-    table = grid(user)
+    table = big_grid(user)
     return render_template('history.html', user=user, balances=balances,
                            table=table)
 
@@ -152,9 +153,15 @@ def history_xlsx():
 def explorer():
     user = current_user
     balances = Balance.query.filter_by(user_id=user.id).first()
-    return 'explorer'
+    return """
+        <h1 align='center'>COMING SOON</h1>
+        <a align='center' href='{{ url_for('index') }}'><h3>Back</h3></a>
+        """
 
 
 @app.route('/api', methods=['GET', 'POST'])
 def api():
-    return 'api'
+    return """
+        <h1 align='center'>COMING SOON</h1>
+        <a align='center' href='{{ url_for('index') }}'><h3>Back</h3></a>
+        """

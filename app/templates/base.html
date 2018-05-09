@@ -66,7 +66,10 @@
         var ws = new WebSocket('wss://api.bitfinex.com/ws/');
         ws.onopen = function() {
           ws.send(JSON.stringify( {
-            "event":"subscribe", "channel":"ticker", "pair":"tBTCUSD"
+            "event":"subscribe",
+            "channel":"ticker",
+            "pair":"tBTCUSD",
+            "prec": "P0"
           }));
         };
         ws.onmessage = function(msg) {
@@ -75,10 +78,18 @@
           if (hb != "hb") {
             var previousLast = parseFloat($('#last').text().substring(1).replace(/,/g, ''));
             var dailyChange = (response[6] * 100).toFixed(2);
+            var bid = Math.round(hb);
+            var ask = Math.round(response[3]);
             var last = Math.round(response[7]);
             const numberWithCommas = function(x) {
               return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
             }
+            $('#trade-price').val("Price: $" + numberWithCommas(last));
+            $('#ask-price').text("$" + numberWithCommas(ask));
+            $('#bid-price').text("$" + numberWithCommas(bid));
+            $.getJSON($SCRIPT_ROOT + '/get_price', {
+              price: last,
+            });
             if (dailyChange > 0) {
               $('#daily-change').html("<h4><strong>Change (24h): <span class='green-change'>" + dailyChange + "% &#9650;</span></strong></h4>");
             } else {
@@ -101,8 +112,7 @@
             $('#balance_btc').html("<strong>" + numberWithCommas({{ balances.balance_btc }}) + "</strong> <sub>BTC </sub><strong>(&#8771; " + numberWithCommas(usd_equivalent) + " </strong><sub>USD</sub><strong>)</strong>");
             $('#balance_usd').html("<strong>" + numberWithCommas({{ balances.balance_usd }}) + "</strong> <sub>USD</sub>");
             $('#balance_total').html("<strong>" + numberWithCommas(balance) + " </strong><sub>Total USD value</sub>");
-            $('#pnlUSD').html("<strong>Total PnL: " + numberWithCommas(pnlUSD) + " </strong><sub>USD</sub>")
-            $('#pnlPercentage').html("<strong>Total PnL: " + pnlPercentage + "</strong>%")
+            $('#pnl').html("Total PnL: <strong>$" + numberWithCommas(pnlUSD) + " (" + numberWithCommas(pnlPercentage) + "</strong>%<strong>)</strong>")
 
             $('#balance-header').html("<strong>BALANCES:</strong>")
             $('#balance_btc-header').html("<strong>BTC:</strong> " + numberWithCommas({{ balances.balance_btc }}))
