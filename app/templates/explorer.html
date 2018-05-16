@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <!-- Content Wrapper. Contains page content -->
+  <div class="content-wrapper">
+    <!-- Content Header (Page header) -->
+    <section class="content-header">
+      <h1>Explorer</h1>
+    </section>
+
+    <!-- Main content -->
+    <section class="content">
+
+      <!-- PAGE HEADER -->
+      <div class="box box-info"></div>
+      <br>
+        <form class="login101-form validate-form" action="" method="post">
+          {{ form.hidden_tag() }}
+
+          <div class="wrap-input101 validate-input m-b-10" data-validate = "Please enter a valid number">
+            {{ form.search(id="search-bar", class="input101", value="", autocomplete="off", style="background-color:#e3eeec; font-style:italic;", placeholder="Search the blockchain for an address, block hash, block height or transaction ID", size=36) }}
+            {% for error in form.search.errors %}
+              <span style="color: red;">[{{ error }}]</span>
+            {% endfor %}
+          </div>
+
+        </form>
+        {% with messages = get_flashed_messages() %}
+          {% if messages %}
+            {% for message in messages %}
+              <h4 style="color: white;" align="center">{{ message }}</h4>
+            {% endfor %}
+          {% endif %}
+        {% endwith %}
+
+    </section>
+    <!-- /.content -->
+
+  </div>
+{% endblock %}

@@ -14,9 +14,9 @@ git clone https://github.com/jackwsellers/digital-vault
 ###### Running the app:
 ```
 export FLASK_APP=gui.py FLASK_DEBUG=1
-flask run
+flask run --host=0.0.0.0
 ```
-Once the flask app is running, visit http://127.0.0.1:5000/ in your browser
+Once the flask app is running, visit your server's IP address or domain name in your browser
 
 #### 2. Wallet
 #### 3. Server

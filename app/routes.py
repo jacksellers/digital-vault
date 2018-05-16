@@ -1,7 +1,7 @@
 from flask_login import current_user, login_user, logout_user, login_required
 from flask import render_template, flash, redirect, url_for, request, \
                   jsonify, session
-from app.forms import LoginForm, RegistrationForm, TradeForm
+from app.forms import LoginForm, RegistrationForm, TradeForm, ExplorerForm
 from app.models import User, Balance, Trade, Transfer
 from app.tables import clean, grid, big_grid, export
 from werkzeug.urls import url_parse
@@ -113,14 +113,16 @@ def trade():
             flash('Your {} trade failed - insufficient funds'.format(
                   tx_type.lower()))
         return redirect(url_for('trade'))
-    return render_template('trade.html', user=user, balances=balances, 
+    return render_template('trade.html', user=user, balances=balances,
                            form=form)
 
 
 @app.route('/funding', methods=['GET', 'POST'])
 @login_required
 def funding():
-    return 'funding'
+    user = current_user
+    balances = Balance.query.filter_by(user_id=user.id).first()
+    return render_template('funding.html', user=user, balances=balances)
 
 
 @app.route('/get_price')
@@ -153,10 +155,11 @@ def history_xlsx():
 def explorer():
     user = current_user
     balances = Balance.query.filter_by(user_id=user.id).first()
-    return """
-        <h1 align='center'>COMING SOON</h1>
-        <a align='center' href='{{ url_for('index') }}'><h3>Back</h3></a>
-        """
+    form = ExplorerForm()
+    if form.validate_on_submit():
+        pass
+    return render_template('explorer.html', user=user, balances=balances, 
+                           form=form)
 
 
 @app.route('/api', methods=['GET', 'POST'])
