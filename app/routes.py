@@ -3,7 +3,7 @@ from flask import render_template, flash, redirect, url_for, request, \
                   jsonify, session
 from app.forms import LoginForm, RegistrationForm, TradeForm, ExplorerForm
 from app.models import User, Balance, Trade, Transfer
-from app.tables import clean, grid, big_grid, export
+from app.tables import clean, grid, big_grid, export, blocks_table
 from werkzeug.urls import url_parse
 import flask_excel as excel
 from app import app, db
@@ -56,7 +56,7 @@ def register():
         user.set_password(form.password.data)
         db.session.add(user)
         db.session.commit()
-        transfer = Transfer(tx_type="Deposit", amount=500000, currency="USD",
+        transfer = Transfer(tx_type='Deposit', amount=500000, currency='USD',
                             user_id=user.id)
         balances = Balance(balance_btc=0, balance_usd=500000, user_id=user.id)
         db.session.add_all([transfer, balances])
@@ -101,8 +101,8 @@ def trade():
             db.session.commit()
             trade = Trade(tx_type=tx_type, amount=amount, price=price,
                           total=total, user_id=user.id)
-            new_balances = Balance(balance_btc=new_balance_btc, 
-                                   balance_usd=new_balance_usd, 
+            new_balances = Balance(balance_btc=new_balance_btc,
+                                   balance_usd=new_balance_usd,
                                    user_id=user.id)
             db.session.add_all([trade, new_balances])
             db.session.commit()
@@ -122,7 +122,8 @@ def trade():
 def funding():
     user = current_user
     balances = Balance.query.filter_by(user_id=user.id).first()
-    return render_template('funding.html', user=user, balances=balances)
+    form = TradeForm()
+    return render_template('funding.html', user=user, balances=balances, form=form)
 
 
 @app.route('/get_price')
@@ -156,10 +157,11 @@ def explorer():
     user = current_user
     balances = Balance.query.filter_by(user_id=user.id).first()
     form = ExplorerForm()
+    table = blocks_table(6)
     if form.validate_on_submit():
         pass
     return render_template('explorer.html', user=user, balances=balances, 
-                           form=form)
+                           form=form, table=table)
 
 
 @app.route('/api', methods=['GET', 'POST'])

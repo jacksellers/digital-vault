@@ -1,6 +1,8 @@
 from app.models import User, Trade, Transfer
+from app.blockchain import get_from_bitcoind
 from operator import itemgetter
 from app import db
+import time
 
 
 def format_id(id, tx_type):
@@ -141,3 +143,24 @@ def export(user, rows='all'):
         return table
     else:
         return table[:rows]
+
+
+def blocks_table(n):
+    table = []
+    previous_block_hash = ''
+    for m in range(0, n):
+        if m == 0:
+            block_hash = get_from_bitcoind('getbestblockhash')
+        else:
+            block_hash = previous_block_hash
+        block = get_from_bitcoind('getblock', [block_hash])
+        block_hash = block_hash
+        block_height = block['height']
+        block_time = int((int(time.time()) - block['time']) / 60)
+        block_txs = len(block['tx'])
+        print(block_height)
+        block_size = block['size'] / 1000
+        previous_block_hash = block['previousblockhash']
+        table.append([block_hash, '{:,}'.format(block_height), block_time,
+                      clean(block_txs), block_size])
+    return table

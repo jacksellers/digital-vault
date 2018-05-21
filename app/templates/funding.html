@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 
 {% block content %}
+
   <!-- Content Wrapper. Contains page content -->
   <div class="content-wrapper">
     <!-- Content Header (Page header) -->
@@ -12,15 +13,90 @@
     <section class="content">
 
       <!-- PAGE HEADER -->
-      <div class="box box-info"></div>
+      <div class="box box-info" style='color:white;'></div>
 
-      <div class="funding-buttons">
-        <a href="JavaScript:Void(0);" class="funding-button funding-save"><i class="fa fa-download"></i> Deposit</a>
-        <a href="JavaScript:Void(0);" class="funding-button funding-save"><i class="fa fa-share-square-o"></i> Withdraw</a>
+      <!-- Main row -->
+      <div class="row">
+        
+        
+          <div class="col-md-4">
+              <div class="funding-buttons">
+                  <a href="JavaScript:Void(0);" class="funding-button funding-save"><i class="fas fa-download"></i> Deposit</a>
+                  <a href="JavaScript:Void(0);" class="funding-button funding-save"><i class="fas fa-upload"></i> Withdraw</a>
+                </div>
+                <br>
+                <br>
+                <br>
+            <div class="box box-default bg-aqua" style="width: 350px;">
+                <!-- /.box-header -->
+                <div class="box-body" style="height: 300px;">
+                  <form action="" method="post">
+                    <input type="radio" name="gender" value="male" checked="checked"><h4><i class="fab fa-bitcoin"></i><strong> Bitcoin (BTC)</strong></h4><br><br><hr>
+                    <input type="radio" name="gender" value="female" disabled="true"><h4><i class="fas fa-money-check-alt"></i><strong> US Dollar (USD)</strong></h4>
+                    [Currently unavailable]
+                  </form>
+                </div>
+                <!-- /.box-body -->
+
+
+              </div>
+              <!-- /.box -->
+          <!-- TABLE: Latest activity -->
+          <div class="box box-info" style='color:white; width: 350px;'>
+              <div class="box-header with-border" style='color:white;'>
+                <h3 class="box-title"><strong>Latest Transfers</strong></h3>
+              </div>
+              <!-- /.box-header -->
+              <div class="box-body">
+                <div class="table-responsive">
+                  <table class="table no-margin">
+                    <thead>
+                    <tr>
+                      <th>ID</th>
+                      <th>Date</th>
+                      <th>Time</th>
+                      <th>Amount</th>
+                      <th>Confirmations</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+  
+                    {% for row in table %}
+                      <tr>
+                        {% if row[6] != '' %}
+                          <td><a href={{ "https://blockchain.info/tx/" + row[6] }} class="id-link">{{ row[0] }}</a></td>
+                        {% else %}
+                          <td><a class="id-link">{{ row[0] }}</a></td>
+                        {% endif %}
+                        <td>{{ row[2] }}</td>
+                        <td>{{ row[3] }}</td>
+                        {% if row[4] == 'Buy' %}
+                          <td><span class="label label-warning">{{ row[4] }}</span></td>
+                        {% elif row[4] == 'Sell' %}
+                          <td><span class="label label-danger">{{ row[4] }}</span></td>
+                        {% else %}
+                          <td><span class="label label-success">{{ row[4] }}</span></td>
+                        {% endif %}
+                        <td>
+                          <div class="sparkbar" data-color="#00a65a" data-height="20">{{ row[5] }}</div>
+                        </td>
+                      </tr>
+                    {% endfor %}
+  
+                    </tbody>
+                  </table>
+                </div>
+                <!-- /.table-responsive -->
+          </div>
+
+          <!-- /.row -->
+        </div>
+        <!-- /.col -->
+
       </div>
-
+      <!-- /.row -->
     </section>
     <!-- /.content -->
-
   </div>
+  <!-- /.content-wrapper -->
 {% endblock %}

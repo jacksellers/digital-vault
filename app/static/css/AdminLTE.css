@@ -5119,6 +5119,7 @@ a.id-link {
   clear: both;
 }
 a.funding-button {
+  width: 150px;
   color: #ffffff;
   text-decoration: none;
   padding: 7px 12px;
@@ -5146,4 +5147,14 @@ a.funding-button:hover {
 a.funding-button:active {
   background: #222d32;
   border-color: #444;
+}
+a.funding-button:after {
+  background: #222d32;
+  border-color: #444;
+}
+
+/* ---------- Font Awesome ---------- */
+
+i {
+  margin-right: 10px;
 }
