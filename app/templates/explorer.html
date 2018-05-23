@@ -47,7 +47,7 @@
             <!-- /.box-header -->
             <div class="box-body">
               <div class="table-responsive">
-                <table class="table no-margin">
+                <table id="blocks-table" class="table no-margin">
                   <thead>
                   <tr>
                     <th>Hash</th>
@@ -59,11 +59,11 @@
                   </thead>
                   <tbody>
 
-                  {% for row in table %}
+                  {% for row in latest_blocks %}
                     <tr>
-                      <td><a class="id-link">{{ row[0][:35] }}..</a></td>
+                      <td><a class="id-link">{{ row[0][:40] }}..</a></td>
                       <td>{{ row[1] }}</td>
-                      <td>{{ row[2] }} minutes</td>
+                      <td>{{ row[2] }}</td>
                       <td>{{ row[3] }}</td>
                       <td>{{ row[4] }}</td>
                     </tr>
@@ -79,7 +79,67 @@
           <!-- /.box -->
 
         </section>
+
         <!-- right col -->
+        <section class="col-lg-5 connectedSortable ui-sortable">
+          <!-- TABLE: Latest activity -->
+          <div class="box box-info" style='color:white;'>
+            <div class="box-header with-border" style='color:white;'>
+              <h3 class="box-title"><strong>Latest Transactions</strong></h3>
+            </div>
+            <!-- /.box-header -->
+            <div class="box-body">
+              <div class="table-responsive">
+                <table id="txs-table" class="table no-margin">
+                  <thead>
+                  <tr>
+                    <th>Transaction ID</th>
+                    <th>Time</th>
+                    <th>Fee/size</th>
+                    <th>Value</th>
+                  </tr>
+                  </thead>
+                  <tbody>
+
+                  {% for row in latest_blocks %}
+                    <tr>
+                      <td><a class="id-link">{{ row[0][:20] }}..</a></td>
+                      <td>{{ row[1] }}</td>
+                      <td>{{ row[2] }}</td>
+                      <td>{{ row[3] }}</td>
+                    </tr>
+                  {% endfor %}
+
+                  </tbody>
+                </table>
+
+                <script>
+                $(document).ready(function() {
+                  $.getJSON($SCRIPT_ROOT + "/get_blocks", function(data) {
+                    alert(JSON.stringify(data));
+                    // $('#test-table').text(JSON.stringify(data['result']));
+                  });
+                });
+                </script>
+
+                <script>
+                $(document).ready(function() {
+                  $.getJSON($SCRIPT_ROOT + "/get_txs",
+                    function(data) {
+                      // alert(JSON.stringify(data));
+                    }
+                  );
+                });
+                </script>
+
+              </div>
+              <!-- /.table-responsive -->
+            </div>
+            <!-- /.box-body -->
+          </div>
+          <!-- /.box -->
+          <p id="test-table"></p>
+        </section>
         
       </div>
       <!-- /.row (main row) -->

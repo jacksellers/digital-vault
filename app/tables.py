@@ -156,11 +156,29 @@ def blocks_table(n):
         block = get_from_bitcoind('getblock', [block_hash])
         block_hash = block_hash
         block_height = block['height']
-        block_time = int((int(time.time()) - block['time']) / 60)
+        block_time = int(time.time()) - block['time']
+        if block_time < 60:
+            block_time = '0m ' + str(block_time) + 's'
+        elif 60 < block_time < 3600:
+            block_minutes = int(block_time / 60)
+            block_time = str(block_minutes) + 'm ' + str(int(block_time - (block_minutes * 60))) + 's'
+        else:
+            block_hours = int(block_time / 3600)
+            block_minutes = int(block_time / 60)
+            block_time = str(block_hours) + 'h ' + str(int(block_minutes - (block_hours * 60))) + 's'
         block_txs = len(block['tx'])
-        print(block_height)
         block_size = block['size'] / 1000
         previous_block_hash = block['previousblockhash']
-        table.append([block_hash, '{:,}'.format(block_height), block_time,
-                      clean(block_txs), block_size])
+        table.append({'block_hash': block_hash,
+                      'block_height': '{:,}'.format(block_height),
+                      'block_time': block_time, 'block_txs': block_txs,
+                      'block_size': block_size})
     return table
+
+
+def tx_table(n):
+    tx_ids = get_from_bitcoind('getrawmempool')
+    for tx_id in tx_ids:
+        tx_data = get_from_bitcoind('getrawtransaction', [tx_id, 1])
+        tx_time = get_from_bitcoind(tx_data['time'])
+    return tx_ids[:n]

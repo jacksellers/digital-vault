@@ -18,11 +18,10 @@
       <!-- Main row -->
       <div class="row">
         
-        
-          <div class="col-md-4">
+          <div class="col-md-4 connectedSortable ui-sortable">
               <div class="funding-buttons">
-                  <a href="JavaScript:Void(0);" class="funding-button funding-save"><i class="fas fa-download"></i> Deposit</a>
-                  <a href="JavaScript:Void(0);" class="funding-button funding-save"><i class="fas fa-upload"></i> Withdraw</a>
+                  <a id="deposit-button" href="JavaScript:Void(0);" class="funding-button funding-save"><i class="fas fa-download"></i> Deposit</a>
+                  <a id="withdraw-button" href="JavaScript:Void(0);" class="funding-button funding-save"><i class="fas fa-upload"></i> Withdraw</a>
                 </div>
                 <br>
                 <br>
@@ -37,6 +36,36 @@
                   </form>
                 </div>
                 <!-- /.box-body -->
+
+                <script>
+                $(document).ready(function() {
+                  $('#deposit-button').click(function() {
+                    $('#deposit-button').css('background-color', '#222d32');
+                    $('#withdraw-button').css('background-color', '#425964');
+                    $('#funding-header').text('Bitcoin deposit');
+                    $('#funding-instructions-1').text('Deposit bitcoins by sending to the deposit address shown below.');
+                    $('#funding-instructions-2').text('Three confirmations are required before the funds are available for trading.');
+                    $('#qrcode').empty();
+                    var address = 'mopM4vx1jPmb57i69UwUUoFPq96Ga3mAJe';
+                    $('#qrcode').qrcode({
+                      width: 256,
+                      height: 256,
+                      background: "rgb(184, 184, 184)",
+                      text: address
+                    });
+                    $('#funding-address').html('<strong>' + address + '</strong>');
+                  });
+                  $('#withdraw-button').click(function() {
+                    $('#deposit-button').css('background-color', '#425964');
+                    $('#withdraw-button').css('background-color', '#222d32');
+                    $('#funding-header').text('Bitcoin withdrawal');
+                    $('#funding-instructions-1').text('Withdraw bitcoins by providing us with an address and the amount you want to send.');
+                    $('#funding-instructions-2').text('Please ensure that you enter the correct bitcoin address, otherwise your funds may not be recoverable.');
+                    $('#qrcode').empty();
+                    $('#funding-address').empty();
+                  });
+                });
+                </script>
 
 
               </div>
@@ -95,6 +124,25 @@
 
       </div>
       <!-- /.row -->
+
+      <!-- right col -->
+      <section class="col-md-8 connectedSortable ui-sortable">
+
+        <!-- small box -->
+        <div class="small-box" style="height: 580px; color: black; background-color: rgb(184, 184, 184); text-align: center;">
+          <div class="inner">
+            <h3 id="funding-header"></h3>
+            <h4 id="funding-instructions-1"></h4>
+            <h4 id="funding-instructions-2"></h4>
+            <br>
+            <div id="qrcode"></div>
+            <br>
+            <h4 id="funding-address"></h4>
+          </div>
+        </div>
+
+      </section>
+
     </section>
     <!-- /.content -->
   </div>

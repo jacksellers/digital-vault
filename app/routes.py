@@ -3,7 +3,7 @@ from flask import render_template, flash, redirect, url_for, request, \
                   jsonify, session
 from app.forms import LoginForm, RegistrationForm, TradeForm, ExplorerForm
 from app.models import User, Balance, Trade, Transfer
-from app.tables import clean, grid, big_grid, export, blocks_table
+from app.tables import clean, grid, big_grid, export, blocks_table, tx_table
 from werkzeug.urls import url_parse
 import flask_excel as excel
 from app import app, db
@@ -117,6 +117,14 @@ def trade():
                            form=form)
 
 
+@app.route('/get_price')
+@login_required
+def get_price():
+    price = request.args.get('price', 0, type=float)
+    session['price'] = price
+    return jsonify(result=price)
+
+
 @app.route('/funding', methods=['GET', 'POST'])
 @login_required
 def funding():
@@ -124,14 +132,6 @@ def funding():
     balances = Balance.query.filter_by(user_id=user.id).first()
     form = TradeForm()
     return render_template('funding.html', user=user, balances=balances, form=form)
-
-
-@app.route('/get_price')
-@login_required
-def add_numbers():
-    price = request.args.get('price', 0, type=float)
-    session['price'] = price
-    return jsonify(result=price)
 
 
 @app.route('/history')
@@ -157,11 +157,24 @@ def explorer():
     user = current_user
     balances = Balance.query.filter_by(user_id=user.id).first()
     form = ExplorerForm()
-    table = blocks_table(6)
     if form.validate_on_submit():
         pass
-    return render_template('explorer.html', user=user, balances=balances, 
-                           form=form, table=table)
+    return render_template('explorer.html', user=user, balances=balances,
+                           form=form)
+
+
+@app.route('/get_blocks')
+@login_required
+def get_blocks():
+    latest_blocks = blocks_table(6)
+    return jsonify(result=latest_blocks)
+
+
+@app.route('/get_txs')
+@login_required
+def get_txs():
+    latest_txs = tx_table(6)
+    return jsonify(result=latest_txs)
 
 
 @app.route('/api', methods=['GET', 'POST'])
