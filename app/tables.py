@@ -165,7 +165,7 @@ def blocks_table(n):
         else:
             block_hours = int(block_time / 3600)
             block_minutes = int(block_time / 60)
-            block_time = str(block_hours) + 'h ' + str(int(block_minutes - (block_hours * 60))) + 's'
+            block_time = str(block_hours) + 'h ' + str(int(block_minutes - (block_hours * 60))) + 'm'
         block_txs = len(block['tx'])
         block_size = block['size'] / 1000
         previous_block_hash = block['previousblockhash']
@@ -174,11 +174,3 @@ def blocks_table(n):
                       'block_time': block_time, 'block_txs': block_txs,
                       'block_size': block_size})
     return table
-
-
-def tx_table(n):
-    tx_ids = get_from_bitcoind('getrawmempool')
-    for tx_id in tx_ids:
-        tx_data = get_from_bitcoind('getrawtransaction', [tx_id, 1])
-        tx_time = get_from_bitcoind(tx_data['time'])
-    return tx_ids[:n]

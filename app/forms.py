@@ -1,8 +1,9 @@
 from wtforms.validators import ValidationError, DataRequired, Email, EqualTo
 from wtforms import StringField, PasswordField, BooleanField, SubmitField, \
                     FloatField, RadioField
-from app.blockchain import get_from_electrum
+from app.blockchain import get_from_bitcoind, search_blockchain
 from wtforms.validators import DataRequired
+from flask import redirect, url_for
 from flask_wtf import FlaskForm
 from app.models import User
 import bitcoin
@@ -38,22 +39,3 @@ class TradeForm(FlaskForm):
 
 class ExplorerForm(FlaskForm):
     search = StringField('Search', validators=[DataRequired()])
-
-    def validate_search(self, search):
-        search = search.data
-        valid = False
-        if is_address(search):
-            valid = True
-        elif search is int:
-            valid = True
-        
-        """  THIS LOGIC CAN GO SOMEWHERE ELSE ONCE FORMAT HAS BEEN DETERMINED
-        msT1xh5vQ6ZsT3XhdNXFJ4XvEzmvwVfNMS
-        address_balance = \
-            get_from_electrum('blockchain.address.get_balance', search)
-        print(address_balance)
-        print(type(address_balance))
-        print(address_balance['error'])
-        """
-        if not valid:  # Replace this with a condition
-            raise ValidationError('Invalid input')

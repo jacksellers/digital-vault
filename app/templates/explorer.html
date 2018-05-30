@@ -5,7 +5,15 @@
   <div class="content-wrapper">
     <!-- Content Header (Page header) -->
     <section class="content-header">
-      <h1>Explorer</h1>
+      {% if category == 'address' %}
+        <h1>Address: {{ search_id }}</h1>
+      {% elif category == 'block' %}
+        <h1>Block: #{{ search_id }}</h1>
+      {% elif category == 'tx' %}
+        <h1>Transaction: {{ search_id }}</h1>
+      {% else %}
+        <h1>Explorer</h1>
+      {% endif %}
     </section>
 
     <!-- Main content -->
@@ -18,7 +26,7 @@
           {{ form.hidden_tag() }}
 
           <div class="wrap-input101 validate-input m-b-10" data-validate = "Please enter a valid number">
-            {{ form.search(id="search-bar", class="input101", value="", autocomplete="off", style="background-color:#e3eeec; font-style:italic;", placeholder="Search the blockchain for an address, block hash, block height or transaction ID", size=36) }}
+            {{ form.search(id="search-bar", class="input101", value="", autocomplete="off", style="background-color:#e3eeec; font-style:italic;", placeholder="Search the blockchain for a block hash, block height or transaction ID", size=36) }}
             {% for error in form.search.errors %}
               <span style="color: red;">[{{ error }}]</span>
             {% endfor %}
@@ -39,35 +47,30 @@
         <!-- Left col -->
         <section class="col-lg-7 connectedSortable">
 
-          <!-- TABLE: Latest activity -->
+          <!-- TABLE: LEFT -->
           <div class="box box-info" style='color:white;'>
-            <div class="box-header with-border" style='color:white;'>
-              <h3 class="box-title"><strong>Latest Blocks</strong></h3>
+            <div id="left-box-header" class="box-header with-border" style='color:white;'>
+              <h3 id="left-box-title" class="box-title"></h3>
             </div>
             <!-- /.box-header -->
             <div class="box-body">
               <div class="table-responsive">
-                <table id="blocks-table" class="table no-margin">
+                <table id="left-table" class="table no-margin">
                   <thead>
-                  <tr>
-                    <th>Hash</th>
-                    <th>Height</th>
-                    <th>Age</th>
-                    <th>Transactions</th>
-                    <th>Size (kB)</th>
-                  </tr>
-                  </thead>
-                  <tbody>
-
-                  {% for row in latest_blocks %}
                     <tr>
-                      <td><a class="id-link">{{ row[0][:40] }}..</a></td>
-                      <td>{{ row[1] }}</td>
-                      <td>{{ row[2] }}</td>
-                      <td>{{ row[3] }}</td>
-                      <td>{{ row[4] }}</td>
+                    {% if category == None and search_id == None %}
+                      <th>Hash</th>
+                      <th>Height</th>
+                      <th>Age</th>
+                      <th>Transactions</th>
+                      <th>Size (kB)</th>
+                    {% else %}
+                      <th>Summary</th>
+                      <th></th> 
+                    {% endif %}
                     </tr>
-                  {% endfor %}
+                  </thead>
+                  <tbody id="left-body">
 
                   </tbody>
                 </table>
@@ -82,55 +85,35 @@
 
         <!-- right col -->
         <section class="col-lg-5 connectedSortable ui-sortable">
-          <!-- TABLE: Latest activity -->
+          <!-- TABLE: RIGHT -->
           <div class="box box-info" style='color:white;'>
-            <div class="box-header with-border" style='color:white;'>
-              <h3 class="box-title"><strong>Latest Transactions</strong></h3>
+            <div id="right-box-header" class="box-header with-border" style='color:white;'>
+              <h3 id="right-box-title" class="box-title"></h3>
             </div>
             <!-- /.box-header -->
             <div class="box-body">
               <div class="table-responsive">
-                <table id="txs-table" class="table no-margin">
+                <table id="right-table" class="table no-margin">
                   <thead>
                   <tr>
-                    <th>Transaction ID</th>
-                    <th>Time</th>
-                    <th>Fee/size</th>
-                    <th>Value</th>
+                    {% if category == 'address' %}
+                      <th>Transactions</th>
+                      <th></th>
+                    {% elif category == 'block' %}
+                      <th>Hashes</th>
+                      <th></th>
+                    {% elif category == 'tx' %}
+                      <th>Inputs and Outputs</th>
+                      <th></th>
+                    {% else %}
+                      <th>Transaction ID</th>
+                    {% endif %}
                   </tr>
                   </thead>
-                  <tbody>
-
-                  {% for row in latest_blocks %}
-                    <tr>
-                      <td><a class="id-link">{{ row[0][:20] }}..</a></td>
-                      <td>{{ row[1] }}</td>
-                      <td>{{ row[2] }}</td>
-                      <td>{{ row[3] }}</td>
-                    </tr>
-                  {% endfor %}
+                  <tbody id="right-body">
 
                   </tbody>
                 </table>
-
-                <script>
-                $(document).ready(function() {
-                  $.getJSON($SCRIPT_ROOT + "/get_blocks", function(data) {
-                    alert(JSON.stringify(data));
-                    // $('#test-table').text(JSON.stringify(data['result']));
-                  });
-                });
-                </script>
-
-                <script>
-                $(document).ready(function() {
-                  $.getJSON($SCRIPT_ROOT + "/get_txs",
-                    function(data) {
-                      // alert(JSON.stringify(data));
-                    }
-                  );
-                });
-                </script>
 
               </div>
               <!-- /.table-responsive -->
@@ -138,11 +121,193 @@
             <!-- /.box-body -->
           </div>
           <!-- /.box -->
-          <p id="test-table"></p>
+
+          {% if category != None and search_id != None %}
+          <!-- TABLE: BOTTOM -->
+          <div class="box box-info" style='color:white;'>
+            <!-- /.box-header -->
+            <div class="box-body">
+              <div class="table-responsive">
+                <table id="bottom-table" class="table no-margin">
+                  <thead>
+                    <tr>
+                    {% if category == 'tx' %}
+                      <th>Scripts</th>
+                      <th></th> 
+                    {% else %}
+                      <th>Transactions</th>
+                      <th></th> 
+                    {% endif %}
+                    </tr>
+                  </thead>
+                  <tbody id="bottom-body">
+
+                  </tbody>
+                </table>
+              </div>
+              <!-- /.table-responsive -->
+            </div>
+            <!-- /.box-body -->
+          </div>
+          <!-- /.box -->
+          {% endif %}
+
         </section>
         
       </div>
       <!-- /.row (main row) -->
+
+      {% if category == 'address' %}
+        <script>
+        $(document).ready(function() {
+          $('#left-box-header').remove();
+          $('#right-box-header').remove();
+        });
+        </script>
+      {% elif category == 'block' %}
+        <script>
+        $(document).ready(function() {
+          $('#left-box-header').remove();
+          $('#right-box-header').remove();
+          getData('block');
+        });
+        </script>
+      {% elif category == 'tx' %}
+        <script>
+        $(document).ready(function() {
+          $('#left-box-header').remove();
+          $('#right-box-header').remove();
+          getData('tx');
+        });
+        </script>
+      {% else %}
+        <script>
+        $(document).ready(function() {
+          $('#left-box-title').html("<strong>Latest Blocks </strong><i id='left-loading' class='fa fa-spinner fa-spin' style='font-size:24px'></i>");
+          $('#right-box-title').html("<strong>Latest Transactions </strong><i id='right-loading' class='fa fa-spinner fa-spin' style='font-size:24px'></i>");
+          getBlocks();
+          $('#left-loading').remove();
+          getTxs();
+          $('#right-loading').remove();
+          setInterval(function() {
+            getBlocks();
+            getTxs();
+          },
+          1000
+          );
+        });
+        </script>
+      {% endif %}
+
+      <script>
+      function getBlocks() {
+        $.getJSON($SCRIPT_ROOT + "/get_blocks", function(data) {
+          $('#left-body').empty();
+          var dataResult = data.result;
+          for (index in dataResult) {
+            var row = dataResult[index];
+            var tableRow = $("<tr />");
+            $('#left-table').append(tableRow);
+            tableRow.append($("<td><u><a href='/explorer/block/" + row['block_hash'] + "' class='id-link'>" + row['block_hash'].substring(0,40) + ".. </a><u></td>"));
+            tableRow.append($("<td>" + row['block_height'] + "</td>"));
+            tableRow.append($("<td>" + row['block_time'] + "</td>"));
+            tableRow.append($("<td>" + row['block_txs'] + "</td>"));
+            tableRow.append($("<td>" + row['block_size'] + "</td>"));
+          }
+        });
+      }
+
+      function getTxs() {
+        $.getJSON($SCRIPT_ROOT + "/get_mempool", function(data) {
+          $('#right-body').empty();
+          var dataResult = data.result;
+          console.log(dataResult);
+          for (index in dataResult) {
+            var row = dataResult[index];
+            var tableRow = $("<tr />");
+            $('#right-table').append(tableRow);
+            tableRow.append($("<td><u><a href='/explorer/tx/" + row + "' class='id-link'>" + row.substring(0,50) + ".. </a></u></td>"));
+          }
+        });
+      }
+
+      function shiftTables(category, dataResult) {
+        var rightTable = new Object();
+        var bottomTable = new Object();
+        if (category == 'block') {
+          rightTable['hash'] = dataResult['hash'];
+          rightTable['merkleroot'] = dataResult['merkleroot'];
+          if (dataResult['nextblockhash'] == undefined) {
+            rightTable['nextblockhash'] = '';
+          } else {
+            rightTable['nextblockhash'] = dataResult['nextblockhash'];
+          }
+          rightTable['previousblockhash'] = dataResult['previousblockhash'];
+          bottomTable['tx'] = dataResult['tx'];
+          delete dataResult['hash'];
+          delete dataResult['merkleroot'];
+          delete dataResult['nextblockhash'];
+          delete dataResult['previousblockhash'];
+          delete dataResult['tx'];
+        }
+        if (category == 'tx') {
+          bottomTable['vin'] = dataResult['vin'];
+          bottomTable['vout'] = dataResult['vout'];
+          delete dataResult['vin'];
+          delete dataResult['vout'];
+        }
+        newTables = [dataResult, rightTable, bottomTable];
+        return newTables;
+      }
+
+      function getData(category) {
+        $.getJSON($SCRIPT_ROOT + "/get_data", function(data) {
+          var dataResult = data.result;
+          var newTables = shiftTables(category, dataResult);
+          for (index in newTables[0]) {
+            var row = newTables[0][index];
+            var tableRow = $("<tr />");
+            $('#left-table').append(tableRow);
+            tableRow.append($("<td>" + index + "</td>"));
+            if (index == 'blockhash') {
+              tableRow.append($("<td><u><a href='/explorer/block/" + row + "' class='id-link'>" + row + "</a></u></td>"));
+            } else {
+              tableRow.append($("<td>" + row + "</td>"));
+            }
+          }
+          for (index in newTables[1]) {
+            var row = newTables[1][index];
+            var tableRow = $("<tr />");
+            $('#right-table').append(tableRow);
+            tableRow.append($("<td>" + index + "</td>"));
+            if (index == 'hash' || index == 'nextblockhash' && row != '' || index == 'previousblockhash') {
+              tableRow.append($("<td><u><a href='/explorer/block/" + row + "' class='id-link'>" + row.substring(0,35) + ".. </a></u></td>"));
+            } else {
+              tableRow.append($("<td>" + row.substring(0,35) + ".. </td>"));
+            }
+          }
+          for (index in newTables[2]) {
+            var row = newTables[2][index]; 
+            if (category == 'block') {
+              for (item in row) {
+                var rowItem = row[item];
+                var tableRow = $("<tr />");
+                $('#bottom-table').append(tableRow);
+                tableRow.append($("<td><u><a href='/explorer/tx/" + rowItem + "' class='id-link'>" + rowItem.substring(0,50) + ".. </a></u></td>"));
+              }
+            } else if (category == 'tx') {
+              for (item in row) {
+                var rowItem = JSON.stringify(row[item]);
+                console.log(rowItem);
+                var tableRow = $("<tr />");
+                $('#bottom-table').append(tableRow);
+                tableRow.append($("<td>" + rowItem + "</td>"));
+              }
+            }
+          }
+        });
+      }
+      </script>
 
     </section>
     <!-- /.content -->

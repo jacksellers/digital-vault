@@ -2,8 +2,9 @@ from flask_login import current_user, login_user, logout_user, login_required
 from flask import render_template, flash, redirect, url_for, request, \
                   jsonify, session
 from app.forms import LoginForm, RegistrationForm, TradeForm, ExplorerForm
+from app.blockchain import get_from_bitcoind, search_blockchain, get_raw_mempool
 from app.models import User, Balance, Trade, Transfer
-from app.tables import clean, grid, big_grid, export, blocks_table, tx_table
+from app.tables import clean, grid, big_grid, export, blocks_table
 from werkzeug.urls import url_parse
 import flask_excel as excel
 from app import app, db
@@ -153,14 +154,24 @@ def history_xlsx():
 
 
 @app.route('/explorer', methods=['GET', 'POST'])
-def explorer():
+@app.route('/explorer/<category>', methods=['GET', 'POST'])
+@app.route('/explorer/<category>/<search_id>', methods=['GET', 'POST'])
+def explorer(category=None, search_id=None):
     user = current_user
     balances = Balance.query.filter_by(user_id=user.id).first()
     form = ExplorerForm()
     if form.validate_on_submit():
-        pass
+        category, search_id, data = search_blockchain(form.search.data)
+        session['data'] = data
+        if category is not None and search_id is None:
+            return redirect('/explorer/{}'.format(category))
+        if category is not None and search_id is not None:
+            return redirect('/explorer/{}/{}'.format(category, search_id))
+    else:
+        category, search_id, data = search_blockchain(search_id)
+        session['data'] = data
     return render_template('explorer.html', user=user, balances=balances,
-                           form=form)
+                           form=form, category=category, search_id=search_id)
 
 
 @app.route('/get_blocks')
@@ -170,11 +181,39 @@ def get_blocks():
     return jsonify(result=latest_blocks)
 
 
-@app.route('/get_txs')
+@app.route('/get_mempool')
 @login_required
-def get_txs():
-    latest_txs = tx_table(6)
-    return jsonify(result=latest_txs)
+def get_mempool():
+    if 'txs' not in session:
+        txs = []
+        session['txs'] = txs
+    else:
+        txs = session['txs']
+    if 'previous_mempool' not in session:
+        previous_mempool = get_from_bitcoind('getrawmempool')
+        session['previous_mempool'] = previous_mempool
+    else:
+        previous_mempool = session['previous_mempool']
+    mempool = get_from_bitcoind('getrawmempool')
+    if len(mempool) > len(previous_mempool):
+        for tx in mempool:
+            if tx not in previous_mempool:
+                txs.insert(0, tx)
+                txs = txs[0:6]
+    print(len(previous_mempool))
+    print(len(mempool))
+    print(txs)
+    previous_mempool = mempool
+    session['txs'] = txs
+    session['previous_mempool'] = previous_mempool
+    return jsonify(result=txs)
+
+
+@app.route('/get_data')
+@login_required
+def get_data():
+    data = session['data']
+    return jsonify(result=data)
 
 
 @app.route('/api', methods=['GET', 'POST'])

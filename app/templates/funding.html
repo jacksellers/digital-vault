@@ -26,7 +26,7 @@
                 <br>
                 <br>
                 <br>
-            <div class="box box-default bg-aqua" style="width: 350px;">
+            <div class="box box-default bg-aqua" style="width: 400px;">
                 <!-- /.box-header -->
                 <div class="box-body" style="height: 300px;">
                   <form action="" method="post">
@@ -42,7 +42,7 @@
                   $('#deposit-button').click(function() {
                     $('#deposit-button').css('background-color', '#222d32');
                     $('#withdraw-button').css('background-color', '#425964');
-                    $('#funding-header').text('Bitcoin deposit');
+                    $('#funding-header').html('<h3>Bitcoin deposit <i class="fa fa-spinner fa-spin" style="font-size:24px"></i></h3>');
                     $('#funding-instructions-1').text('Deposit bitcoins by sending to the deposit address shown below.');
                     $('#funding-instructions-2').text('Three confirmations are required before the funds are available for trading.');
                     $('#qrcode').empty();
@@ -58,7 +58,7 @@
                   $('#withdraw-button').click(function() {
                     $('#deposit-button').css('background-color', '#425964');
                     $('#withdraw-button').css('background-color', '#222d32');
-                    $('#funding-header').text('Bitcoin withdrawal');
+                    $('#funding-header').html('<h3>Bitcoin withdrawal</h3>');
                     $('#funding-instructions-1').text('Withdraw bitcoins by providing us with an address and the amount you want to send.');
                     $('#funding-instructions-2').text('Please ensure that you enter the correct bitcoin address, otherwise your funds may not be recoverable.');
                     $('#qrcode').empty();
@@ -71,7 +71,7 @@
               </div>
               <!-- /.box -->
           <!-- TABLE: Latest activity -->
-          <div class="box box-info" style='color:white; width: 350px;'>
+          <div class="box box-info" style='color:white; width: 400px;'>
               <div class="box-header with-border" style='color:white;'>
                 <h3 class="box-title"><strong>Latest Transfers</strong></h3>
               </div>
@@ -131,7 +131,7 @@
         <!-- small box -->
         <div class="small-box" style="height: 580px; color: black; background-color: rgb(184, 184, 184); text-align: center;">
           <div class="inner">
-            <h3 id="funding-header"></h3>
+            <span id="funding-header"></span>
             <h4 id="funding-instructions-1"></h4>
             <h4 id="funding-instructions-2"></h4>
             <br>
