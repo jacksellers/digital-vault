@@ -6,7 +6,7 @@ import json
 def get_from_bitcoind(method, params=[]):
     """response = get_from_bitcoind('getreceivedbyaddress',
                                     'msT1xh5vQ6ZsT3XhdNXFJ4XvEzmvwVfNMS')"""
-    url = 'http://alice:default@209.97.136.169:18332/'
+    url = 'http://alice:default@206.189.29.167:18332/'
     headers = {'content-type': 'application/json'}
     payload = {
         'method': method,
@@ -26,7 +26,7 @@ def get_from_electrum(method, params=[]):
     """response = get_from_electrum('blockchain.address.get_balance',
                                     'msT1xh5vQ6ZsT3XhdNXFJ4XvEzmvwVfNMS')"""
     params = [params] if type(params) is not list else params
-    s = socket.create_connection(('209.97.136.169', 50001))
+    s = socket.create_connection(('206.189.29.167', 50001))
     s.send(json.dumps({'id': 0, 'method': method,
                        'params': params}).encode() + b'\n')
     response = json.loads(s.recv(99999)[:-1].decode())
@@ -39,10 +39,7 @@ def search_blockchain(search):
         data = get_from_bitcoind('getblock', [search])
         data['message']
         try:
-            try:
-                height_to_hash = get_from_bitcoind('getblockhash', [int(search)])
-            except:
-                height_to_hash = get_from_bitcoind('getblockhash', [search])
+            height_to_hash = get_from_bitcoind('getblockhash', [search])
             data = get_from_bitcoind('getblock', [height_to_hash])
             data['message']
             try:

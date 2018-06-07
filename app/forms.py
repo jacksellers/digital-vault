@@ -6,7 +6,6 @@ from wtforms.validators import DataRequired
 from flask import redirect, url_for
 from flask_wtf import FlaskForm
 from app.models import User
-import bitcoin
 
 
 class LoginForm(FlaskForm):

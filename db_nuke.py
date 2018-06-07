@@ -1,4 +1,4 @@
-from app.models import User, Balance, Trade, Transfer
+from (digital-vault).app.models import User, Balance, Trade, Transfer
 from app import db
 
 users = User.query.all()

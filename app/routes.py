@@ -87,33 +87,42 @@ def trade():
     if form.validate_on_submit():
         tx_type = form.option.data
         amount = form.btc_amount.data
-        price = session['price']
-        total = price * amount
-        session.pop('price', None)
-        if (tx_type == 'Buy' and balances.balance_usd >= total) or \
-           (tx_type == 'Sell' and balances.balance_btc >= amount):
-            if tx_type == 'Buy':
-                new_balance_btc = balances.balance_btc + amount
-                new_balance_usd = balances.balance_usd - total
+        try:
+            price = session['price']
+            total = price * amount
+            # session.pop('price', None)
+        except KeyError:
+            price = 'N/A'
+            total = 'N/A'
+        print("Amount: ", amount)
+        print("Price: ", price)
+        print("Total: ", total)
+        if all(isinstance(i, float) for i in [amount, price, total]):
+            if (tx_type == 'Buy' and balances.balance_usd >= total) or \
+               (tx_type == 'Sell' and balances.balance_btc >= amount):
+                if tx_type == 'Buy':
+                    new_balance_btc = balances.balance_btc + amount
+                    new_balance_usd = balances.balance_usd - total
+                else:
+                    new_balance_btc = balances.balance_btc - amount
+                    new_balance_usd = balances.balance_usd + total
+                db.session.delete(balances)
+                db.session.commit()
+                trade = Trade(tx_type=tx_type, amount=amount, price=price,
+                              total=total, user_id=user.id)
+                new_balances = Balance(balance_btc=new_balance_btc,
+                                       balance_usd=new_balance_usd,
+                                       user_id=user.id)
+                db.session.add_all([trade, new_balances])
+                db.session.commit()
+                balances = Balance.query.filter_by(user_id=user.id).first()
+                flash('Your {} trade was executed - {} BTC @ ${}'.format(
+                    tx_type.lower(), clean(amount), clean(price)))
             else:
-                new_balance_btc = balances.balance_btc - amount
-                new_balance_usd = balances.balance_usd + total
-            db.session.delete(balances)
-            db.session.commit()
-            trade = Trade(tx_type=tx_type, amount=amount, price=price,
-                          total=total, user_id=user.id)
-            new_balances = Balance(balance_btc=new_balance_btc,
-                                   balance_usd=new_balance_usd,
-                                   user_id=user.id)
-            db.session.add_all([trade, new_balances])
-            db.session.commit()
-            balances = Balance.query.filter_by(user_id=user.id).first()
-            flash('Your {} trade was executed - {} BTC @ ${}'.format(
-                  tx_type.lower(), clean(amount), clean(price)))
+                flash('Your {} trade failed - insufficient funds'.format(
+                    tx_type.lower()))
         else:
-            flash('Your {} trade failed - insufficient funds'.format(
-                  tx_type.lower()))
-        return redirect(url_for('trade'))
+            return redirect(url_for('trade'))
     return render_template('trade.html', user=user, balances=balances,
                            form=form)
 
@@ -200,9 +209,6 @@ def get_mempool():
             if tx not in previous_mempool:
                 txs.insert(0, tx)
                 txs = txs[0:6]
-    print(len(previous_mempool))
-    print(len(mempool))
-    print(txs)
     previous_mempool = mempool
     session['txs'] = txs
     session['previous_mempool'] = previous_mempool

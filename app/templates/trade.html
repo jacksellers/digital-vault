@@ -86,8 +86,24 @@
                     </div>
     
                     <div class="container-login101-form-btn p-t-10">
-                      {{ form.trade(class="login101-form-btn") }}
+                      {{ form.trade(id="trade-button", class="login101-form-btn") }}
                     </div>
+
+                    <script>
+                      /*
+                      $(document).ready(function() {
+                        $('#trade-button').attr("disabled", "true");
+                        $('#"trade-price').change(function() {
+                          if ($(this).val() != "") {
+                            $('#trade-button').removeAttr("disabled");
+                          } else {
+                            $('#trade-button').attr("disabled", "true");        
+                          }
+                        });
+                      });
+                      */
+                    </script>
+
                   </form>
                   {% with messages = get_flashed_messages() %}
                     {% if messages %}
