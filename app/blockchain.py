@@ -6,7 +6,7 @@ import json
 def get_from_bitcoind(method, params=[]):
     """response = get_from_bitcoind('getreceivedbyaddress',
                                     'msT1xh5vQ6ZsT3XhdNXFJ4XvEzmvwVfNMS')"""
-    url = 'http://alice:default@206.189.29.167:18332/'
+    url = 'http://alice:default@127.0.0.1:18332/'
     headers = {'content-type': 'application/json'}
     payload = {
         'method': method,
