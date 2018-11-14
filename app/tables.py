@@ -13,7 +13,7 @@ def format_id(id, tx_type):
 
 
 def format_time(timestamp):
-    hour_string = timestamp.strftime("%-I")
+    hour_string = timestamp.strftime("%I")
     minute_string = timestamp.strftime("%M")
     am_pm_string = timestamp.strftime("%p")
     return hour_string + ':' + minute_string + ' ' + am_pm_string

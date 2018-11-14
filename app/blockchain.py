@@ -6,7 +6,7 @@ import json
 def get_from_bitcoind(method, params=[]):
     """response = get_from_bitcoind('getreceivedbyaddress',
                                     'msT1xh5vQ6ZsT3XhdNXFJ4XvEzmvwVfNMS')"""
-    url = 'http://alice:default@127.0.0.1:18332/'
+    url = 'http://admin:adminpw@ec2-13-228-250-145.ap-southeast-1.compute.amazonaws.com:18332/wallet/DigitalVault'
     headers = {'content-type': 'application/json'}
     payload = {
         'method': method,

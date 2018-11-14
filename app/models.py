@@ -11,13 +11,14 @@ class User(UserMixin, db.Model):
     last_name = db.Column(db.String(64), index=True)
     username = db.Column(db.String(64), index=True, unique=True)
     password_hash = db.Column(db.String(128))
+    address = db.Column(db.String())
     balances = db.relationship('Balance', backref='client', lazy='dynamic')
     trades = db.relationship('Trade', backref='client', lazy='dynamic')
     transfers = db.relationship('Transfer', backref='client', lazy='dynamic')
 
     def __repr__(self):
         return '({}: {} {} @{})'.format(
-            self.id, self.first_name, self.last_name, self.username)
+            self.id, self.first_name, self.last_name, self.username, self.address)
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)

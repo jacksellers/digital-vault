@@ -46,14 +46,17 @@
                     $('#funding-instructions-1').text('Deposit bitcoins by sending to the deposit address shown below.');
                     $('#funding-instructions-2').text('Three confirmations are required before the funds are available for trading.');
                     $('#qrcode').empty();
-                    var address = 'mopM4vx1jPmb57i69UwUUoFPq96Ga3mAJe';
-                    $('#qrcode').qrcode({
-                      width: 256,
-                      height: 256,
-                      background: "rgb(184, 184, 184)",
-                      text: address
+                    var address;
+                    $.getJSON($SCRIPT_ROOT + "/get_address", function(data) {
+                      address = data.result
+                      $('#qrcode').qrcode({
+                        width: 256,
+                        height: 256,
+                        background: "rgb(184, 184, 184)",
+                        text: address
+                      });
+                      $('#funding-address').html('<strong>' + address + '</strong>');
                     });
-                    $('#funding-address').html('<strong>' + address + '</strong>');
                   });
                   $('#withdraw-button').click(function() {
                     $('#deposit-button').css('background-color', '#425964');
@@ -131,7 +134,7 @@
         <!-- small box -->
         <div class="small-box" style="height: 580px; color: black; background-color: rgb(184, 184, 184); text-align: center;">
           <div class="inner">
-            <span id="funding-header"></span>
+            <span id="funding-header"><h3><i class="fas fa-arrow-left"></i> Please select a funding option</h3></span>
             <h4 id="funding-instructions-1"></h4>
             <h4 id="funding-instructions-2"></h4>
             <br>

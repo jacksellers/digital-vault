@@ -52,8 +52,12 @@ def register():
         return redirect(url_for('index'))
     form = RegistrationForm()
     if form.validate_on_submit():
+        address = get_from_bitcoind('getnewaddress', [])
+        dumpPri = get_from_bitcoind('dumpprivkey', [address])
+        impoPri = get_from_bitcoind('importprivkey', [dumpPri])
+
         user = User(first_name=form.first_name.data,
-                    last_name=form.last_name.data, username=form.username.data)
+                    last_name=form.last_name.data, username=form.username.data, address=address)
         user.set_password(form.password.data)
         db.session.add(user)
         db.session.commit()
@@ -228,3 +232,21 @@ def api():
         <h1 align='center'>COMING SOON</h1>
         <a align='center' href='{{ url_for('index') }}'><h3>Back</h3></a>
         """
+
+@app.route('/get_address')
+@login_required
+def get_address():    
+    user = current_user
+    print("user............",user.username)
+    users = User.query.filter(User.username==user.username).first()
+    return jsonify(result=users.address)
+
+
+@app.route('/get_deposit')
+@login_required
+def get_deposit():
+    user = current_user
+    address = get_address()
+    unspentlist = get_from_bitcoind('listunspent',[6,9999999,[address]])
+    print("unspentlist....................",unspentlist)
+    return unspentlist
