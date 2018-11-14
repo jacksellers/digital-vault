@@ -1,22 +1,17 @@
 # Digital Vault
-### A multi-signature Bitcoin custody solution
-##### 1. Flask app (website)
-##### 2. Wallet
-##### 3. Server
-#### 1. Flask app
-###### Dependencies:
-- [Flask](http://flask.pocoo.org/)
+## A multi-signature Bitcoin custody solution
+### Dependencies:
 - [Python 3](https://www.python.org/)
-###### Installation:
+- [Pip](https://pypi.org/project/pip/)
+- [Flask](http://flask.pocoo.org/)
+#### Installation:
 ```
-git clone https://github.com/jackwsellers/digital-vault
+git clone https://github.com/jackwsellers/digital-vault.git
+cd digital-vault
 ```
-###### Running the app:
+#### Running the app:
 ```
-export FLASK_APP=gui.py FLASK_DEBUG=1
+pip3 install flask_sqlalchemy, flask_login, flask_migrate, flask_sslify, flask_excel, wtforms, flask_wtf
+export FLASK_APP=app.py FLASK_DEBUG=1
 flask run --host=0.0.0.0
 ```
-Once the flask app is running, visit your server's IP address or domain name in your browser
-
-#### 2. Wallet
-#### 3. Server
