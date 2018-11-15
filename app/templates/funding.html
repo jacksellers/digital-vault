@@ -57,6 +57,23 @@
                       });
                       $('#funding-address').html('<strong>' + address + '</strong>');
                     });
+                    var getDeposit = setInterval(function() {
+                      $.getJSON($SCRIPT_ROOT + "/get_deposit", function(data) {
+                        var deposit = data['result'];
+                        console.log("deposite data.....", deposit)
+                        if (deposit != 'None') {
+                          $('#qrcode').empty();
+                          $('#funding-header').html('<h3>Bitcoin deposit <i class="fas fa-check-circle"></i></h3>');
+                          $('#funding-instructions-1').text('Deposit successful');
+                          //$('#funding-instructions-2').html('Transaction ID: <a href="/explorer/tx/' + deposit + '">' + deposit + '</a>');
+                          $('#funding-instructions-2').html('Transaction ID: <a target="_blank" href="https://testnet.blockchain.info/tx/' + deposit + '">' + deposit + '</a>');
+                          $('#funding-address').empty();
+                          clearInterval(getDeposit);
+                        }
+                      });
+                    },
+                    1000
+                    );
                   });
                   $('#withdraw-button').click(function() {
                     $('#deposit-button').css('background-color', '#425964');
@@ -66,6 +83,43 @@
                     $('#funding-instructions-2').text('Please ensure that you enter the correct bitcoin address, otherwise your funds may not be recoverable.');
                     $('#qrcode').empty();
                     $('#funding-address').empty();
+                    $('#qrcode').html('<div class="box-body" style="height: 343px;"><form id="withdraw-form" class="login101-form validate-form" action="" method="post"><div class="wrap-input101 validate-input m-b-10"><input id="withdraw-address", autocomplete="off", placeholder="Destination address", style="background-color:#e3eeec", class="input101", value="", size=36></div><div class="wrap-input101 validate-input m-b-10" data-validate = "Please enter a valid number"><input id="withdraw-amount", class="input101", value="", autocomplete="off", placeholder="Amount (BTC)", size=36></div><div class="container-login101-form-btn p-t-10"><input type="button" value="Withdraw" id="withdraw-button-2", class="login101-form-btn"></div></form><h4 style="color: white;" align="center"></h4></div><!-- /.box-body -->');
+                    $('#withdraw-button-2').click(function() {
+                      $('#funding-header').html('<h3>Bitcoin withdrawal <i class="fa fa-spinner fa-spin" style="font-size:24px"></i></h3>');
+                      var getWithdrawal = setInterval(function() {
+                        $.getJSON($SCRIPT_ROOT + "/get_withdrawal", {
+                            address: $('#withdraw-address').val(),
+                            amount: $('#withdraw-amount').val()
+                        }, function(data) {
+                          var withdrawal = data['result'];
+                          if (withdrawal != 'None') {
+                            if (withdrawal == 'error-main') {
+                              $('#funding-header').html('<h3>Bitcoin withdrawal</h3>');
+                              $('#funding-address').html('<strong>We currently only support testnet transactions</strong>');
+                            } else if (withdrawal == 'error-address') {
+                              $('#funding-header').html('<h3>Bitcoin withdrawal</h3>');
+                              $('#funding-address').html('<strong>Please enter a valid address</strong>');
+                            } else if (withdrawal == 'error-amount') {
+                              $('#funding-header').html('<h3>Bitcoin withdrawal</h3>');
+                              $('#funding-address').html('<strong>Please enter a valid amount</strong>');
+                            } else if (withdrawal == 'error-both') {
+                              $('#funding-header').html('<h3>Bitcoin withdrawal</h3>');
+                              $('#funding-address').html('<strong>Please enter a valid address and amount</strong>');
+                            } else {
+                              $('#funding-header').html('<h3>Bitcoin withdrawal <i class="fas fa-check-circle"></i></h3>');
+                              $('#qrcode').empty();
+                              $('#funding-address').empty();
+                              $('#funding-instructions-1').text('Withdrawal successful');
+                              //$('#funding-instructions-2').html('Transaction ID: <a href="/explorer/tx/' + withdrawal + '">' + withdrawal + '</a>');
+                              $('#funding-instructions-2').html('Transaction ID: <a target="_blank" href="https://testnet.blockchain.info/tx/' + withdrawal + '">' + withdrawal + '</a>');
+                            }
+                            clearInterval(getWithdrawal);
+                          }
+                        });
+                      },
+                      1000
+                      );
+                    });
                   });
                 });
                 </script>
@@ -92,26 +146,14 @@
                     </tr>
                     </thead>
                     <tbody>
-  
-                    {% for row in table %}
+
+                    {% for row in latest_txs %}
                       <tr>
-                        {% if row[6] != '' %}
-                          <td><a href={{ "https://blockchain.info/tx/" + row[6] }} class="id-link">{{ row[0] }}</a></td>
-                        {% else %}
-                          <td><a class="id-link">{{ row[0] }}</a></td>
-                        {% endif %}
+                        <td><a href="{{ '/explorer/block/' + row[0] }}" class="id-link">{{ row[0][:3] }}...</a></td>
+                        <td>{{ row[1] }}</td>
                         <td>{{ row[2] }}</td>
                         <td>{{ row[3] }}</td>
-                        {% if row[4] == 'Buy' %}
-                          <td><span class="label label-warning">{{ row[4] }}</span></td>
-                        {% elif row[4] == 'Sell' %}
-                          <td><span class="label label-danger">{{ row[4] }}</span></td>
-                        {% else %}
-                          <td><span class="label label-success">{{ row[4] }}</span></td>
-                        {% endif %}
-                        <td>
-                          <div class="sparkbar" data-color="#00a65a" data-height="20">{{ row[5] }}</div>
-                        </td>
+                        <td>{{ row[4] }}</td>
                       </tr>
                     {% endfor %}
   

@@ -246,7 +246,72 @@ def get_address():
 @login_required
 def get_deposit():
     user = current_user
-    address = get_address()
-    unspentlist = get_from_bitcoind('listunspent',[6,9999999,[address]])
+    users = User.query.filter(User.username==user.username).first()
+    balances = Balance.query.filter_by(user_id=user.id).first()
+    deposit = 'None'
+    balanceUsd = balances.balance_usd
+    addresses = [users.address]
+    unspentlist = get_from_bitcoind('listunspent',[2,9999999,addresses]) #need to clear
     print("unspentlist....................",unspentlist)
-    return unspentlist
+        
+    latest_transfers = Transfer.query.filter_by(user_id=user.id).all()
+    db_txs = []
+    for transfer in latest_transfers:
+        db_txs.append(transfer.tx_id)
+    if unspentlist:
+        txid = unspentlist[0]['txid']
+        if txid not in db_txs:        
+            db.session.delete(balances)
+            db.session.commit()
+            #btcBalance = get_from_bitcoind('getbalance',[])
+            #new_balance_btc = '%.04f' % btcBalance
+            new_balance_btc = get_from_bitcoind('getreceivedbyaddress',[users.address, 2])
+            print("new_balance_btc...........",new_balance_btc)
+            new_balances = Balance(balance_btc=new_balance_btc, balance_usd=balanceUsd, user_id=user.id)
+            transfer = Transfer(tx_type='deposit', amount=new_balance_btc, currency='BTC', tx_id=txid, user_id=user.id)
+            db.session.add_all([transfer, new_balances])
+            db.session.commit()
+            deposit = txid
+
+    return jsonify(result=deposit)
+
+
+@app.route('/get_withdrawal')
+@login_required
+def get_withdrawal():
+    address = request.args.get('address', 0, type=str)
+    amount = request.args.get('amount', 0, type=float)
+    withdrawal = 'None'
+    try:
+        if type(amount) is not float:
+            withdrawal = 'error-amount'
+        else:
+            user = current_user
+            balances = Balance.query.filter_by(user_id=user.id).first()
+            balanceUsd = balances.balance_usd
+            addresses = [address]
+            sendAmountTxID = get_from_bitcoind('sendtoaddress',[address,amount])
+            print("sendAmount...................",sendAmountTxID)
+            latest_transfers = Transfer.query.filter_by(user_id=user.id).all()
+            db_txs = []
+            for transfer in latest_transfers:
+                db_txs.append(transfer.tx_id)
+            
+            if sendAmountTxID not in db_txs:        
+                db.session.delete(balances)
+                db.session.commit()
+                new_balance_btc = get_from_bitcoind('getreceivedbyaddress',[address, 2])
+                print("new_balance_btc...........",new_balance_btc)
+                new_balances = Balance(balance_btc=new_balance_btc, balance_usd=balanceUsd, user_id=user.id)
+                transfer = Transfer(tx_type='withdrawal', amount=new_balance_btc, currency='BTC', tx_id=sendAmountTxID, user_id=user.id)
+                db.session.add_all([transfer, new_balances])
+                db.session.commit()
+                withdrawal = sendAmountTxID
+
+    except ValueError:
+        withdrawal = 'error-address'
+    if withdrawal in ['error-amount', 'error-address']:
+        if type(amount) is not float:
+            withdrawal = 'error-both'
+
+    return jsonify(result=withdrawal)
