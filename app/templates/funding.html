@@ -92,11 +92,10 @@
                             amount: $('#withdraw-amount').val()
                         }, function(data) {
                           var withdrawal = data['result'];
+                          console.log("withdrawal..................",withdrawal)
                           if (withdrawal != 'None') {
-                            if (withdrawal == 'error-main') {
-                              $('#funding-header').html('<h3>Bitcoin withdrawal</h3>');
-                              $('#funding-address').html('<strong>We currently only support testnet transactions</strong>');
-                            } else if (withdrawal == 'error-address') {
+                            console.log("withdrawalahdjhasd............")
+                            if (withdrawal == 'error-address') {
                               $('#funding-header').html('<h3>Bitcoin withdrawal</h3>');
                               $('#funding-address').html('<strong>Please enter a valid address</strong>');
                             } else if (withdrawal == 'error-amount') {
@@ -117,7 +116,7 @@
                           }
                         });
                       },
-                      1000
+                      10000
                       );
                     });
                   });

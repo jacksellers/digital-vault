@@ -104,19 +104,26 @@
 
             // TEMPORARY SCRIPT - Still need to incorporate net deposits and withdrawals
             var price = parseFloat($('#last').text().substring(1).replace(/,/g, ''));
-            var usd_equivalent = {{ balances.balance_btc }} * price;
+            
+            var confirmed_balance = {{ balances.unconfirmed_balance_btc }}
+            var balanceBTC = {{ balances.confirmed_balance_btc }}
+            if (confirmed_balance == 0) { 
+              confirmed_balance = balanceBTC
+            } 
+
+            var usd_equivalent = confirmed_balance * price;
             var balance = {{ balances.balance_usd }} + usd_equivalent;
             var pnlUSD = balance - 500000 + (0 * price); // REPLACE '0' WITH NET DEPOSITS & WITHDRAWALS (see spreadsheet)
             var pnlChange = pnlUSD / 500000;
             var pnlPercentage = (pnlChange * 100).toFixed(2);
 
-            $('#balance_btc').html("<strong>" + numberWithCommas({{ balances.balance_btc }}) + "</strong> <sub>BTC </sub><strong>(&#8771; " + numberWithCommas(usd_equivalent) + " </strong><sub>USD</sub><strong>)</strong>");
+            $('#unconfirmed_balance_btc').html("<strong>" + numberWithCommas(confirmed_balance) + "</strong> <sub>BTC </sub><strong>(&#8771; " + numberWithCommas(usd_equivalent) + " </strong><sub>USD</sub><strong>)</strong>");
             $('#balance_usd').html("<strong>" + numberWithCommas({{ balances.balance_usd }}) + "</strong> <sub>USD</sub>");
             $('#balance_total').html("<strong>" + numberWithCommas(balance) + " </strong><sub>Total USD value</sub>");
             $('#pnl').html("Total PnL: <strong>$" + numberWithCommas(pnlUSD) + " (" + numberWithCommas(pnlPercentage) + "</strong>%<strong>)</strong>")
 
             $('#balance-header').html("<strong>BALANCES:</strong>")
-            $('#balance_btc-header').html("<strong>BTC:</strong> " + numberWithCommas({{ balances.balance_btc }}))
+            $('#balance_btc-header').html("<strong>BTC:</strong> " + numberWithCommas(confirmed_balance))
             $('#balance_usd-header').html("<strong>USD:</strong> " + numberWithCommas({{ balances.balance_usd }}))
             $('#last-header').html("<strong>BTC/USD:</strong> $" + numberWithCommas(last))
             // TEMPORARY SCRIPT - Still need to incorporate net deposits and withdrawals

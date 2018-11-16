@@ -63,7 +63,7 @@ def register():
         db.session.commit()
         transfer = Transfer(tx_type='Deposit', amount=500000, currency='USD',
                             user_id=user.id)
-        balances = Balance(balance_btc=0, balance_usd=500000, user_id=user.id)
+        balances = Balance(confirmed_balance_btc=0, unconfirmed_balance_btc=0, balance_usd=500000, confirmation_status=0, user_id=user.id)
         db.session.add_all([transfer, balances])
         db.session.commit()
         flash('You have successfully registered - please log in')
@@ -248,27 +248,42 @@ def get_deposit():
     user = current_user
     users = User.query.filter(User.username==user.username).first()
     balances = Balance.query.filter_by(user_id=user.id).first()
+    confirmedBalanceBTC = balances.confirmed_balance_btc
+    unConfirmedBalanceBTC = balances.unconfirmed_balance_btc
+    confirmation_status = balances.confirmation_status
     deposit = 'None'
     balanceUsd = balances.balance_usd
     addresses = [users.address]
-    unspentlist = get_from_bitcoind('listunspent',[2,9999999,addresses]) #need to clear
+    unspentlist = get_from_bitcoind('listunspent',[0,100,addresses]) #need to clear
     print("unspentlist....................",unspentlist)
-        
     latest_transfers = Transfer.query.filter_by(user_id=user.id).all()
     db_txs = []
+    
     for transfer in latest_transfers:
         db_txs.append(transfer.tx_id)
-    if unspentlist:
-        txid = unspentlist[0]['txid']
-        if txid not in db_txs:        
+    for unspent in unspentlist:
+        txid = unspent['txid']
+        amount = unspent['amount']
+        confirmations = unspent['confirmations']        
+        if confirmations >= 6 and confirmation_status == 0:
+            confirmation_status = 1
             db.session.delete(balances)
             db.session.commit()
-            #btcBalance = get_from_bitcoind('getbalance',[])
-            #new_balance_btc = '%.04f' % btcBalance
-            new_balance_btc = get_from_bitcoind('getreceivedbyaddress',[users.address, 2])
-            print("new_balance_btc...........",new_balance_btc)
-            new_balances = Balance(balance_btc=new_balance_btc, balance_usd=balanceUsd, user_id=user.id)
-            transfer = Transfer(tx_type='deposit', amount=new_balance_btc, currency='BTC', tx_id=txid, user_id=user.id)
+            new_confirmed_balance_btc = '%.07f' % (confirmedBalanceBTC + amount)
+            unConfirmedBalanceBTC = 0.00
+            new_balances = Balance(confirmed_balance_btc=new_confirmed_balance_btc, unconfirmed_balance_btc=unConfirmedBalanceBTC , balance_usd=balanceUsd, user_id=user.id, confirmation_status=confirmation_status)
+            transfer = Transfer(tx_type='deposit', amount=amount, currency='BTC', tx_id=txid, user_id=user.id)
+            db.session.add_all([transfer, new_balances])
+            db.session.commit()
+            deposit = txid
+
+        if txid not in db_txs:
+            db.session.delete(balances)
+            db.session.commit()          
+            new_unconfirmed_balance_btc = '%.07f' % (unConfirmedBalanceBTC + amount)
+            new_balances = Balance(confirmed_balance_btc=confirmedBalanceBTC, unconfirmed_balance_btc=new_unconfirmed_balance_btc, balance_usd=balanceUsd, user_id=user.id, confirmation_status=confirmation_status)
+            transfer = Transfer(tx_type='deposit', amount=amount, currency='BTC', tx_id=txid, user_id=user.id)
+            print("new_balance_btc...........",new_balances)            
             db.session.add_all([transfer, new_balances])
             db.session.commit()
             deposit = txid
@@ -286,9 +301,13 @@ def get_withdrawal():
         if type(amount) is not float:
             withdrawal = 'error-amount'
         else:
+            print("In else.........................")
             user = current_user
             balances = Balance.query.filter_by(user_id=user.id).first()
             balanceUsd = balances.balance_usd
+            confirmedBalanceBTC = balances.confirmed_balance_btc
+            unConfirmedBalanceBTC = balances.unconfirmed_balance_btc
+            confirmation_status = balances.confirmation_status
             addresses = [address]
             sendAmountTxID = get_from_bitcoind('sendtoaddress',[address,amount])
             print("sendAmount...................",sendAmountTxID)
@@ -297,13 +316,32 @@ def get_withdrawal():
             for transfer in latest_transfers:
                 db_txs.append(transfer.tx_id)
             
+            transaction_info = get_from_bitcoind('gettransaction',[sendAmountTxID])
+            fees_BTC = '%.07f' % transaction_info['fee']
+            print("fees.......................",fees_BTC)
+            unspentlist = get_from_bitcoind('listunspent',[0,100,addresses]) #need to clear
+            print("unspentlist....................",unspentlist)
+            for unspent in unspentlist:
+                txid = unspent['txid']
+                confirmations = unspent['confirmations']        
+                if confirmations >= 6 and confirmation_status == 0:
+                    confirmation_status = 1
+                    db.session.delete(balances)
+                    db.session.commit()
+                    new_confirmed_balance_btc = '%.07f' % float(confirmedBalanceBTC) - float(amount) + float(fees_BTC) #since fees coming -
+                    unConfirmedBalanceBTC = 0.00
+                    new_balances = Balance(confirmed_balance_btc=new_confirmed_balance_btc, unconfirmed_balance_btc=unConfirmedBalanceBTC , balance_usd=balanceUsd, user_id=user.id, confirmation_status=confirmation_status)
+                    transfer = Transfer(tx_type='withdrawal', amount=amount, currency='BTC', tx_id=txid, user_id=user.id)
+                    db.session.add_all([transfer, new_balances])
+                    db.session.commit()
+                    withdrawal = sendAmountTxID
+
             if sendAmountTxID not in db_txs:        
                 db.session.delete(balances)
-                db.session.commit()
-                new_balance_btc = get_from_bitcoind('getreceivedbyaddress',[address, 2])
-                print("new_balance_btc...........",new_balance_btc)
-                new_balances = Balance(balance_btc=new_balance_btc, balance_usd=balanceUsd, user_id=user.id)
-                transfer = Transfer(tx_type='withdrawal', amount=new_balance_btc, currency='BTC', tx_id=sendAmountTxID, user_id=user.id)
+                db.session.commit()               
+                new_unconfirmed_balance_btc = '%.07f' % (float(confirmedBalanceBTC) - float(amount)) + float(fees_BTC)
+                new_balances = Balance(confirmed_balance_btc=confirmedBalanceBTC, unconfirmed_balance_btc=new_unconfirmed_balance_btc, balance_usd=balanceUsd, user_id=user.id,confirmation_status=confirmation_status)
+                transfer = Transfer(tx_type='withdrawal', amount=amount, currency='BTC', tx_id=txid, user_id=user.id)
                 db.session.add_all([transfer, new_balances])
                 db.session.commit()
                 withdrawal = sendAmountTxID
@@ -313,5 +351,5 @@ def get_withdrawal():
     if withdrawal in ['error-amount', 'error-address']:
         if type(amount) is not float:
             withdrawal = 'error-both'
-
+    print("withdrawal.......................",withdrawal)
     return jsonify(result=withdrawal)

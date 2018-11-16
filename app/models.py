@@ -29,13 +29,15 @@ class User(UserMixin, db.Model):
 
 class Balance(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    balance_btc = db.Column(db.Float, index=True)
+    confirmed_balance_btc = db.Column(db.Float, index=True)
+    unconfirmed_balance_btc = db.Column(db.Float, index=True)
     balance_usd = db.Column(db.Float, index=True)
+    confirmation_status = db.Column(db.Integer, index=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
 
     def __repr__(self):
-        return '({}: Balance (BTC): {}, Balance (USD): {}, User ID: {})'.format(
-            self.id, self.balance_btc, self.balance_usd, self.user_id)
+        return '({}: ConfirmedBalance (BTC): {}, UnConfirmedBalance (BTC): {}, Balance (USD): {}, confirmation_status: {}, User ID: {})'.format(
+            self.id, self.confirmed_balance_btc, self.unconfirmed_balance_btc, self.balance_usd, self.confirmation_status, self.user_id)
 
 
 class Trade(db.Model):
