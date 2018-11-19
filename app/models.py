@@ -32,12 +32,11 @@ class Balance(db.Model):
     confirmed_balance_btc = db.Column(db.Float, index=True)
     unconfirmed_balance_btc = db.Column(db.Float, index=True)
     balance_usd = db.Column(db.Float, index=True)
-    confirmation_status = db.Column(db.Integer, index=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
 
     def __repr__(self):
-        return '({}: ConfirmedBalance (BTC): {}, UnConfirmedBalance (BTC): {}, Balance (USD): {}, confirmation_status: {}, User ID: {})'.format(
-            self.id, self.confirmed_balance_btc, self.unconfirmed_balance_btc, self.balance_usd, self.confirmation_status, self.user_id)
+        return '({}: ConfirmedBalance (BTC): {}, UnConfirmedBalance (BTC): {}, Balance (USD): {}, User ID: {})'.format(
+            self.id, self.confirmed_balance_btc, self.unconfirmed_balance_btc, self.balance_usd, self.user_id)
 
 
 class Trade(db.Model):
@@ -61,11 +60,12 @@ class Transfer(db.Model):
     amount = db.Column(db.Float, index=True)
     currency = db.Column(db.String(64), index=True)
     tx_id = db.Column(db.Integer, index=True)
+    confirmation_status = db.Column(db.Integer, index=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
 
     def __repr__(self):
-        return '({}: Timestamp: {}, Type: {}, Currency: {}, Amount: {}, User ID: {})'.format(
-            self.id, self.timestamp, self.tx_type, self.currency, self.amount, self.user_id)
+        return '({}: Timestamp: {}, Type: {}, Currency: {}, Amount: {}, User ID: {}, Confirmation Status)'.format(
+            self.id, self.timestamp, self.tx_type, self.currency, self.amount, self.user_id, self.confirmation_status)
 
 
 @login.user_loader

@@ -72,7 +72,7 @@
                         }
                       });
                     },
-                    1000
+                    10000
                     );
                   });
                   $('#withdraw-button').click(function() {
@@ -108,7 +108,7 @@
                               $('#funding-header').html('<h3>Bitcoin withdrawal <i class="fas fa-check-circle"></i></h3>');
                               $('#qrcode').empty();
                               $('#funding-address').empty();
-                              $('#funding-instructions-1').text('Withdrawal successful');
+                              $('#funding-instructions-1').text('Withdrawal successful with Unconfirmed Balance');
                               //$('#funding-instructions-2').html('Transaction ID: <a href="/explorer/tx/' + withdrawal + '">' + withdrawal + '</a>');
                               $('#funding-instructions-2').html('Transaction ID: <a target="_blank" href="https://testnet.blockchain.info/tx/' + withdrawal + '">' + withdrawal + '</a>');
                             }
