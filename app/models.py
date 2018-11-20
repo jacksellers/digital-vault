@@ -64,8 +64,8 @@ class Transfer(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
 
     def __repr__(self):
-        return '({}: Timestamp: {}, Type: {}, Currency: {}, Amount: {}, User ID: {}, Confirmation Status)'.format(
-            self.id, self.timestamp, self.tx_type, self.currency, self.amount, self.user_id, self.confirmation_status)
+        return '({}: Timestamp: {}, Type: {}, Currency: {}, tx_id: {}, Amount: {}, User ID: {}, Confirmation Status: {})'.format(
+            self.id, self.timestamp, self.tx_type, self.currency, self.tx_id , self.amount, self.user_id, self.confirmation_status)
 
 
 @login.user_loader

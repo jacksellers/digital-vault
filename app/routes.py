@@ -8,6 +8,7 @@ from app.tables import clean, grid, big_grid, export, blocks_table
 from werkzeug.urls import url_parse
 import flask_excel as excel
 from app import app, db
+from sqlalchemy import desc
 
 
 @app.errorhandler(404)
@@ -260,18 +261,23 @@ def get_deposit():
         db_txs.append(transfer.tx_id)
     for unspent in unspentlist:
         txid = unspent['txid']
+        print("txiddddddddddddddddddddddd",txid)
         amount = unspent['amount']
         confirmations = unspent['confirmations']
-        status = Transfer.query.filter_by(tx_id=txid).first()
-        if status != None:
-            confirmation_status = status.confirmation_status
+        status = Transfer.query.filter_by(tx_id=txid).all()
+        print("ststus............",status)
+        if status:
+            confirmation_status = status[-1].confirmation_status
             print("confirmation_status.............", confirmation_status)
         
         if txid not in db_txs:
             confirmation_status = 0
             db.session.delete(balances)
             db.session.commit()          
-            new_unconfirmed_balance_btc = '%.07f' % (unConfirmedBalanceBTC + amount)
+            if unConfirmedBalanceBTC > 0:
+                new_unconfirmed_balance_btc = '%.07f' % (unConfirmedBalanceBTC + amount)
+            else:
+                new_unconfirmed_balance_btc = '%.07f' % (confirmedBalanceBTC + amount)
             new_balances = Balance(confirmed_balance_btc=confirmedBalanceBTC, unconfirmed_balance_btc=new_unconfirmed_balance_btc, balance_usd=balanceUsd, user_id=user.id)
             transfer = Transfer(tx_type='deposit', amount=amount, currency='BTC', tx_id=txid, confirmation_status=confirmation_status, user_id=user.id)
             print("new_balance_btc...........",new_balances)            
@@ -279,15 +285,17 @@ def get_deposit():
             db.session.commit()
             deposit = txid
 
-        if confirmations >= 6 and confirmation_status == 0:
+        if confirmations >= 1 and confirmation_status == 0:
             print("confirmation greater than 6....")
             confirmation_status = 1
             db.session.delete(balances)
             db.session.commit()
+            print("unConfirmedBalanceBTC..........",unConfirmedBalanceBTC)
             new_confirmed_balance_btc = unConfirmedBalanceBTC
             unConfirmedBalanceBTC = 0.00
             new_balances = Balance(confirmed_balance_btc=new_confirmed_balance_btc, unconfirmed_balance_btc=unConfirmedBalanceBTC , balance_usd=balanceUsd, user_id=user.id)
             transfer = Transfer(tx_type='deposit', amount=amount, currency='BTC', tx_id=txid, confirmation_status=confirmation_status, user_id=user.id)
+            print("Transhs/................",transfer)
             db.session.add_all([transfer, new_balances])
             db.session.commit()
             deposit = txid
@@ -337,24 +345,26 @@ def get_withdrawal():
                 confirmation_status = 0     
                 db.session.delete(balances)
                 db.session.commit()               
-                new_unconfirmed_balance_btc = '%.07f' % (unConfirmedBalanceBTC - amount + fees_BTC)  #since fees coming -
+                new_unconfirmed_balance_btc = '%.07f' % (confirmedBalanceBTC - amount + fees_BTC)  #since fees coming -
+                if unConfirmedBalanceBTC > 0:
+                    new_unconfirmed_balance_btc = '%.07f' % (unConfirmedBalanceBTC + new_unconfirmed_balance_btc)
                 new_balances = Balance(confirmed_balance_btc=confirmedBalanceBTC, unconfirmed_balance_btc=new_unconfirmed_balance_btc, balance_usd=balanceUsd, user_id=user.id)
                 transfer = Transfer(tx_type='withdrawal', amount=amount, currency='BTC', tx_id=sendAmountTxID,confirmation_status=confirmation_status, user_id=user.id)
                 db.session.add_all([transfer, new_balances])
                 db.session.commit()
                 withdrawal = sendAmountTxID
 
-            if confirmations >= 6 and confirmation_status == 0:
-                confirmation_status = 1
-                db.session.delete(balances)
-                db.session.commit()
-                new_confirmed_balance_btc = unConfirmedBalanceBTC
-                unConfirmedBalanceBTC = 0.00
-                new_balances = Balance(confirmed_balance_btc=new_confirmed_balance_btc, unconfirmed_balance_btc=unConfirmedBalanceBTC , balance_usd=balanceUsd, user_id=user.id)
-                transfer = Transfer(tx_type='withdrawal', amount=amount, currency='BTC', tx_id=sendAmountTxID,confirmation_status=confirmation_status, user_id=user.id)
-                db.session.add_all([transfer, new_balances])
-                db.session.commit()
-                withdrawal = sendAmountTxID          
+            # if confirmations >= 6 and confirmation_status == 0:
+            #     confirmation_status = 1
+            #     db.session.delete(balances)
+            #     db.session.commit()
+            #     new_confirmed_balance_btc = unConfirmedBalanceBTC
+            #     unConfirmedBalanceBTC = 0.00
+            #     new_balances = Balance(confirmed_balance_btc=new_confirmed_balance_btc, unconfirmed_balance_btc=unConfirmedBalanceBTC , balance_usd=balanceUsd, user_id=user.id)
+            #     transfer = Transfer(tx_type='withdrawal', amount=amount, currency='BTC', tx_id=sendAmountTxID,confirmation_status=confirmation_status, user_id=user.id)
+            #     db.session.add_all([transfer, new_balances])
+            #     db.session.commit()
+            #     withdrawal = sendAmountTxID          
 
     except ValueError:
         withdrawal = 'error-address'
