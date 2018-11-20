@@ -271,7 +271,7 @@ def get_deposit():
             confirmation_status = 0
             db.session.delete(balances)
             db.session.commit()          
-            new_unconfirmed_balance_btc = '%.07f' % (unConfirmedBalanceBTC + amount)
+            new_unconfirmed_balance_btc = '%.07f' % (confirmedBalanceBTC + amount)
             new_balances = Balance(confirmed_balance_btc=confirmedBalanceBTC, unconfirmed_balance_btc=new_unconfirmed_balance_btc, balance_usd=balanceUsd, user_id=user.id)
             transfer = Transfer(tx_type='deposit', amount=amount, currency='BTC', tx_id=txid, confirmation_status=confirmation_status, user_id=user.id)
             print("new_balance_btc...........",new_balances)            
@@ -337,7 +337,7 @@ def get_withdrawal():
                 confirmation_status = 0     
                 db.session.delete(balances)
                 db.session.commit()               
-                new_unconfirmed_balance_btc = '%.07f' % (unConfirmedBalanceBTC - amount + fees_BTC)  #since fees coming -
+                new_unconfirmed_balance_btc = '%.07f' % (confirmedBalanceBTC - amount + fees_BTC)  #since fees coming -
                 new_balances = Balance(confirmed_balance_btc=confirmedBalanceBTC, unconfirmed_balance_btc=new_unconfirmed_balance_btc, balance_usd=balanceUsd, user_id=user.id)
                 transfer = Transfer(tx_type='withdrawal', amount=amount, currency='BTC', tx_id=sendAmountTxID,confirmation_status=confirmation_status, user_id=user.id)
                 db.session.add_all([transfer, new_balances])
