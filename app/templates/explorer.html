@@ -15,7 +15,6 @@
         <h1>Explorer</h1>
       {% endif %}
     </section>
-
     <!-- Main content -->
     <section class="content">
 
@@ -156,7 +155,7 @@
         
       </div>
       <!-- /.row (main row) -->
-
+      
       {% if category == 'address' %}
         <script>
         $(document).ready(function() {
@@ -174,6 +173,7 @@
         </script>
       {% elif category == 'tx' %}
         <script>
+        console.log("data from jinja",'{{ data.hash }}')
         $(document).ready(function() {
           $('#left-box-header').remove();
           $('#right-box-header').remove();
@@ -193,7 +193,7 @@
             getBlocks();
             getTxs();
           },
-          1000
+          1000000
           );
         });
         </script>
@@ -259,10 +259,12 @@
         newTables = [dataResult, rightTable, bottomTable];
         return newTables;
       }
-
+      
       function getData(category) {
-        $.getJSON($SCRIPT_ROOT + "/get_data", function(data) {
-          var dataResult = data.result;
+        //$.getJSON($SCRIPT_ROOT + "/get_data", function(data) {
+         // var dataResult = data.result;
+          var dataResult = JSON.parse('{{ data | tojson | safe}}');
+          console.log(dataResult)
           var newTables = shiftTables(category, dataResult);
           for (index in newTables[0]) {
             var row = newTables[0][index];
@@ -305,7 +307,7 @@
               }
             }
           }
-        });
+        //});
       }
       </script>
 

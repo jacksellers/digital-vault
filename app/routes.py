@@ -2,14 +2,14 @@ from flask_login import current_user, login_user, logout_user, login_required
 from flask import render_template, flash, redirect, url_for, request, \
                   jsonify, session
 from app.forms import LoginForm, RegistrationForm, TradeForm, ExplorerForm
-from app.blockchain import get_from_bitcoind, search_blockchain, get_raw_mempool
+from app.blockchain import *
 from app.models import User, Balance, Trade, Transfer
 from app.tables import clean, grid, big_grid, export, blocks_table
 from werkzeug.urls import url_parse
 import flask_excel as excel
 from app import app, db
 from sqlalchemy import desc
-
+import json
 
 @app.errorhandler(404)
 def page_not_found(e):
@@ -169,25 +169,44 @@ def history_xlsx():
 @app.route('/explorer', methods=['GET', 'POST'])
 @app.route('/explorer/<category>', methods=['GET', 'POST'])
 @app.route('/explorer/<category>/<search_id>', methods=['GET', 'POST'])
-def explorer(category=None, search_id=None):
+def explorer(category=None, search_id=""):
     user = current_user
     balances = Balance.query.filter_by(user_id=user.id).first()
     form = ExplorerForm()
     if form.validate_on_submit():
-        category, search_id, data = search_blockchain(form.search.data)
-        session['data'] = data
-        if category is not None and search_id is None:
+        
+        data = search_blockchain_block(form.search.data)
+        if "message" not in data:   #message means error
+            category = 'block'
+            search_id = form.search.data
+        else:
+            print("tye............",type(form.search.data))
+            data = search_blockchain_height(form.search.data)
+            if "message" not in data:   #message means error
+                category = 'block'
+                search_id = form.search.data
+            else:
+                data = search_blockchain_tx(form.search.data)
+                if "message" not in data:   #message means error
+                    category = 'tx'
+                    search_id = form.search.data
+
+        if category is not None and search_id is "":
             return redirect('/explorer/{}'.format(category))
-        if category is not None and search_id is not None:
+        if category is not None and search_id is not "":
             return redirect('/explorer/{}/{}'.format(category, search_id))
     else:
-        category, search_id, data = search_blockchain(search_id)
-        session['data'] = data
+        data = search_blockchain_block(search_id)
+        if "message" in data:   #message means error            
+            data = search_blockchain_height(search_id)
+            if "message" in data:
+                data = search_blockchain_tx(search_id)        
+
     return render_template('explorer.html', user=user, balances=balances,
-                           form=form, category=category, search_id=search_id)
+                           form=form, category=category, search_id=search_id, data=data)
 
 
-@app.route('/get_blocks')
+@app.route('/get_blocks')   
 @login_required
 def get_blocks():
     latest_blocks = blocks_table(6)
@@ -223,6 +242,7 @@ def get_mempool():
 @login_required
 def get_data():
     data = session['data']
+    print("data in data.........",data)
     return jsonify(result=data)
 
 

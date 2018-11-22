@@ -1,7 +1,7 @@
 import requests
 import socket
 import json
-
+import re
 
 def get_from_bitcoind(method, params=[]):
     """response = get_from_bitcoind('getreceivedbyaddress',
@@ -32,35 +32,53 @@ def get_from_electrum(method, params=[]):
     response = json.loads(s.recv(99999)[:-1].decode())
     return response
 
+# def search_blockchain(search):
+#     try:
+#         # address ???
+#         data = get_from_bitcoind('getblock', [search])
+#         data['message']
+#         try:            
+#             height_to_hash = get_from_bitcoind('getblockhash', [search])
+#             data = get_from_bitcoind('getblock', [height_to_hash])
+#             data['message']
+#             try:
+#                 data = get_from_bitcoind('getrawtransaction', [search, 1])
+#                 data['message']
+#                 category = None
+#                 search_id = None
+#             except KeyError:
+#                 category = 'tx'
+#                 search_id = search
+#         except KeyError:
+#             category = 'block'
+#             search_id = search
+#     except KeyError:
+#         category = 'block'
+#         search_id = data['height']
+#     print('category: ', category)
+#     print('search_id: ', search_id)
+#     #print('data: ', data)
+#     return category, search_id, data
 
-def search_blockchain(search):
-    try:
-        # address ???
-        data = get_from_bitcoind('getblock', [search])
-        data['message']
-        try:
-            height_to_hash = get_from_bitcoind('getblockhash', [search])
-            data = get_from_bitcoind('getblock', [height_to_hash])
-            data['message']
-            try:
-                data = get_from_bitcoind('getrawtransaction', [search, 1])
-                data['message']
-                category = None
-                search_id = None
-            except KeyError:
-                category = 'tx'
-                search_id = search
-        except KeyError:
-            category = 'block'
-            search_id = search
-    except KeyError:
-        category = 'block'
-        search_id = data['height']
-    print('category: ', category)
-    print('search_id: ', search_id)
-    print('data: ', data)
-    return category, search_id, data
+def search_blockchain_block(search):
+    data = get_from_bitcoind('getblock', [search])
+    return data
 
+def search_blockchain_height(search):
+    if search == "" or not re.match("^[0-9]*$", search): 
+        searchID = str(search)
+    else: 
+        searchID = int(search)
+    print("searchid.....",searchID)
+    print("type..........",type(searchID))
+    height_to_hash = get_from_bitcoind('getblockhash', [searchID])
+    data = get_from_bitcoind('getblock', [height_to_hash])
+    print("data...........",height_to_hash)
+    return data
+
+def search_blockchain_tx(search):
+    data = get_from_bitcoind('getrawtransaction', [search, 1])
+    return data
 
 def get_raw_mempool():
     tx_ids = []

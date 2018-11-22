@@ -1,7 +1,7 @@
 from wtforms.validators import ValidationError, DataRequired, Email, EqualTo
 from wtforms import StringField, PasswordField, BooleanField, SubmitField, \
                     FloatField, RadioField
-from app.blockchain import get_from_bitcoind, search_blockchain
+from app.blockchain import get_from_bitcoind
 from wtforms.validators import DataRequired
 from flask import redirect, url_for
 from flask_wtf import FlaskForm
