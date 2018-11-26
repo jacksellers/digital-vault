@@ -180,7 +180,6 @@ def explorer(category=None, search_id=""):
             category = 'block'
             search_id = form.search.data
         else:
-            print("tye............",type(form.search.data))
             data = search_blockchain_height(form.search.data)
             if "message" not in data:   #message means error
                 category = 'block'
@@ -190,6 +189,11 @@ def explorer(category=None, search_id=""):
                 if "message" not in data:   #message means error
                     category = 'tx'
                     search_id = form.search.data
+                else:
+                    data = search_blockchain_address(form.search.data)
+                    if "message" not in data:
+                        category = 'address'
+                        search_id = form.search.data
 
         if category is not None and search_id is "":
             return redirect('/explorer/{}'.format(category))
@@ -200,7 +204,10 @@ def explorer(category=None, search_id=""):
         if "message" in data:   #message means error            
             data = search_blockchain_height(search_id)
             if "message" in data:
-                data = search_blockchain_tx(search_id)        
+                data = search_blockchain_tx(search_id)   
+                if "message" in data:
+                    data = search_blockchain_address(search_id)
+                    print("data.......",data)     
 
     return render_template('explorer.html', user=user, balances=balances,
                            form=form, category=category, search_id=search_id, data=data)
@@ -213,30 +220,39 @@ def get_blocks():
     return jsonify(result=latest_blocks)
 
 
+# @app.route('/get_mempool')
+# @login_required
+# def get_mempool():
+#     if 'txs' not in session:
+#         txs = []
+#         #session['txs'] = txs
+#     else:
+#         txs = session['txs']
+#     if 'previous_mempool' not in session:
+#         previous_mempool = get_from_bitcoind('getrawmempool')
+#         session['previous_mempool'] = previous_mempool
+#     else:
+#         previous_mempool = session['previous_mempool']
+#     mempool = get_from_bitcoind('getrawmempool')
+#     if len(mempool) > len(previous_mempool):
+#         for tx in mempool:
+#             if tx not in previous_mempool:
+#                 txs.insert(0, tx)
+#                 txs = txs[0:6]
+#     previous_mempool = mempool
+#     #session['txs'] = txs
+#     #session['previous_mempool'] = previous_mempool
+#     return jsonify(result=txs)
+
 @app.route('/get_mempool')
 @login_required
 def get_mempool():
-    if 'txs' not in session:
-        txs = []
-        session['txs'] = txs
-    else:
-        txs = session['txs']
-    if 'previous_mempool' not in session:
-        previous_mempool = get_from_bitcoind('getrawmempool')
-        session['previous_mempool'] = previous_mempool
-    else:
-        previous_mempool = session['previous_mempool']
     mempool = get_from_bitcoind('getrawmempool')
-    if len(mempool) > len(previous_mempool):
-        for tx in mempool:
-            if tx not in previous_mempool:
-                txs.insert(0, tx)
-                txs = txs[0:6]
-    previous_mempool = mempool
-    session['txs'] = txs
-    session['previous_mempool'] = previous_mempool
+    txs = []
+    for tx in mempool:
+        txs.insert(0, tx)
+        txs = txs[0:6]
     return jsonify(result=txs)
-
 
 @app.route('/get_data')
 @login_required
@@ -274,21 +290,18 @@ def get_deposit():
     balanceUsd = balances.balance_usd
     addresses = [users.address]
     unspentlist = get_from_bitcoind('listunspent',[0,100,addresses]) #need to clear
-    print("unspentlist....................",unspentlist)
     latest_transfers = Transfer.query.filter_by(user_id=user.id).all()
     db_txs = []
     for transfer in latest_transfers:
         db_txs.append(transfer.tx_id)
     for unspent in unspentlist:
         txid = unspent['txid']
-        print("txiddddddddddddddddddddddd",txid)
         amount = unspent['amount']
         confirmations = unspent['confirmations']
         status = Transfer.query.filter_by(tx_id=txid).all()
         print("ststus............",status)
         if status:
             confirmation_status = status[-1].confirmation_status
-            print("confirmation_status.............", confirmation_status)
         
         if txid not in db_txs:
             confirmation_status = 0
@@ -315,7 +328,6 @@ def get_deposit():
             unConfirmedBalanceBTC = 0.00
             new_balances = Balance(confirmed_balance_btc=new_confirmed_balance_btc, unconfirmed_balance_btc=unConfirmedBalanceBTC , balance_usd=balanceUsd, user_id=user.id)
             transfer = Transfer(tx_type='deposit', amount=amount, currency='BTC', tx_id=txid, confirmation_status=confirmation_status, user_id=user.id)
-            print("Transhs/................",transfer)
             db.session.add_all([transfer, new_balances])
             db.session.commit()
             deposit = txid
@@ -355,11 +367,7 @@ def get_withdrawal():
             status = Transfer.query.filter_by(tx_id=sendAmountTxID).first()
             if status != None:
                 confirmation_status = status.confirmation_status
-                print("confirmation_status.............", confirmation_status) 
-            # unspentlist = get_from_bitcoind('listunspent',[0,10,addresses]) #need to clear
-            # print("unspentlist....................",unspentlist)
-            # for unspent in unspentlist:
-                #txid = unspent['txid']
+
             confirmations = transaction_info['confirmations'] 
             if sendAmountTxID not in db_txs:
                 confirmation_status = 0     
@@ -391,5 +399,4 @@ def get_withdrawal():
     if withdrawal in ['error-amount', 'error-address']:
         if type(amount) is not float:
             withdrawal = 'error-both'
-    print("withdrawal.......................",withdrawal)
     return jsonify(result=withdrawal)

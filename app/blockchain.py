@@ -69,16 +69,24 @@ def search_blockchain_height(search):
         searchID = str(search)
     else: 
         searchID = int(search)
-    print("searchid.....",searchID)
-    print("type..........",type(searchID))
+    
     height_to_hash = get_from_bitcoind('getblockhash', [searchID])
     data = get_from_bitcoind('getblock', [height_to_hash])
-    print("data...........",height_to_hash)
     return data
 
 def search_blockchain_tx(search):
     data = get_from_bitcoind('getrawtransaction', [search, 1])
     return data
+
+def search_blockchain_address(search):
+    address_info = []
+    data = get_from_bitcoind('listreceivedbyaddress', [0, bool(1), bool(1)])
+    for item in data:
+        #print("items.......",item['address'])
+        if item['address'] == search:
+            address_info.append(item)
+            #print("addsedd...........",address_info)
+    return address_info
 
 def get_raw_mempool():
     tx_ids = []

@@ -102,7 +102,7 @@
                       <th>Hashes</th>
                       <th></th>
                     {% elif category == 'tx' %}
-                      <th>Inputs and Outputs</th>
+                      <th>Outputs</th>
                       <th></th>
                     {% else %}
                       <th>Transaction ID</th>
@@ -124,6 +124,7 @@
           {% if category != None and search_id != None %}
           <!-- TABLE: BOTTOM -->
           <div class="box box-info" style='color:white;'>
+          <div id="bottom-box-header" class="box-header with-border" style='color:white;'>
             <!-- /.box-header -->
             <div class="box-body">
               <div class="table-responsive">
@@ -132,7 +133,7 @@
                     <tr>
                     {% if category == 'tx' %}
                       <th>Scripts</th>
-                      <th></th> 
+                      <th></th>   
                     {% else %}
                       <th>Transactions</th>
                       <th></th> 
@@ -147,6 +148,7 @@
               <!-- /.table-responsive -->
             </div>
             <!-- /.box-body -->
+            </div>
           </div>
           <!-- /.box -->
           {% endif %}
@@ -161,6 +163,8 @@
         $(document).ready(function() {
           $('#left-box-header').remove();
           $('#right-box-header').remove();
+          $('#bottom-box-header').remove();
+          getData('address');
         });
         </script>
       {% elif category == 'block' %}
@@ -193,7 +197,7 @@
             getBlocks();
             getTxs();
           },
-          1000000
+          10000
           );
         });
         </script>
@@ -221,7 +225,7 @@
         $.getJSON($SCRIPT_ROOT + "/get_mempool", function(data) {
           $('#right-body').empty();
           var dataResult = data.result;
-          console.log(dataResult);
+          console.log("datares",dataResult);
           for (index in dataResult) {
             var row = dataResult[index];
             var tableRow = $("<tr />");
@@ -234,6 +238,7 @@
       function shiftTables(category, dataResult) {
         var rightTable = new Object();
         var bottomTable = new Object();
+        
         if (category == 'block') {
           rightTable['hash'] = dataResult['hash'];
           rightTable['merkleroot'] = dataResult['merkleroot'];
@@ -250,13 +255,50 @@
           delete dataResult['previousblockhash'];
           delete dataResult['tx'];
         }
+
         if (category == 'tx') {
-          bottomTable['vin'] = dataResult['vin'];
-          bottomTable['vout'] = dataResult['vout'];
+          var rightTableTx = [];
+          for (var key in dataResult['vout']) {
+            //console.log("jsnd",rightTable)
+            var rightTable = new Object();
+            rightTable['addresses'] = dataResult['vout'][key]['scriptPubKey']['addresses'];
+            rightTable['hex'] = dataResult['vout'][key]['scriptPubKey']['hex'];
+            rightTable['type'] = dataResult['vout'][key]['scriptPubKey']['type'];
+            rightTable['value'] = dataResult['vout'][key]['value'];
+            rightTableTx.push(rightTable)
+          }          
+          var bottomTableTx = [];
+          for (var key in dataResult['vin']) {
+            var bottomTable = new Object();
+            bottomTable['asm'] = dataResult['vin'][key]['scriptSig']['asm']
+            bottomTable['hex'] = dataResult['vin'][key]['scriptSig']['hex']
+            bottomTable['txid'] = dataResult['vin'][key]['txid']
+            bottomTable['txinwitness'] = dataResult['vin'][key]['txinwitness']
+            bottomTable['vout'] = dataResult['vin'][key]['vout']
+            bottomTableTx.push(bottomTable)
+          }
+          //rightTable['vout'] = dataResult['vout'];
+          //bottomTable['vin'] = dataResult['vin']
           delete dataResult['vin'];
           delete dataResult['vout'];
         }
-        newTables = [dataResult, rightTable, bottomTable];
+
+        if (category == 'address') {
+          
+          for (var key in dataResult) {
+            var leftTable = new Object();
+            leftTable['confirmed_balance'] = {{ balances.confirmed_balance_btc }}
+            leftTable['unconfirmed_balance'] = {{ balances.unconfirmed_balance_btc }}
+            leftTable['address'] = dataResult[key]['address']
+            leftTable['receiving_amount'] = dataResult[key]['amount']
+            leftTable['confirmations'] = dataResult[key]['confirmations']
+            leftTable['no.Transactions'] = dataResult[key]['txids'].length            
+            rightTable['Transactions'] = dataResult[key]['txids']
+          }
+          
+        }
+        //console.log("rightTableTx",rightTableTx)
+        newTables = [dataResult, rightTable, bottomTable, rightTableTx, bottomTable, leftTable];
         return newTables;
       }
       
@@ -266,7 +308,90 @@
           var dataResult = JSON.parse('{{ data | tojson | safe}}');
           console.log(dataResult)
           var newTables = shiftTables(category, dataResult);
-          for (index in newTables[0]) {
+          console.log("newTables..",newTables)
+          
+            //for (var j=0;j<newTables[3].length;j++) {
+            if (category == 'tx') {
+              for (index in newTables[0]) {
+                var row = newTables[0][index];
+                var tableRow = $("<tr />");
+                $('#left-table').append(tableRow);
+                tableRow.append($("<td>" + index + "</td>"));
+                if (index == 'blockhash') {
+                  tableRow.append($("<td><u><a href='/explorer/block/" + row + "' class='id-link'>" + row + "</a></u></td>"));
+                } else {
+                  tableRow.append($("<td>" + row + "</td>"));
+                }
+              }
+              //if(!insideTx){
+               // insideTx = true;
+                var row = newTables[3];console.log(newTables[3]);
+                var table1 = [];
+                var table2 = [];                
+                for (var i=0;i<row.length;i++){
+                  if ((i+2)%2==0) {
+                      table1.push(row[i]);
+                  }
+                  else {
+                      table2.push(row[i]);
+                  }
+                }
+                for (item in table1[0]) {
+                  var rowItem = table1[0][item];
+                  //$('#right-table').append(row[item]['scriptSig']);
+                  var tableRow = $("<tr />");
+                  $('#right-table').append(tableRow);
+                  tableRow.append($("<td>" + item + "</td>"));
+                  tableRow.append($("<td>" + rowItem + "</td>"));                
+                }
+
+                var tableRow1 = $("<tr />");
+                tableRow1.append($("<th>" + "Outputs" + "</th>"));
+                tableRow1.append($("<th>" + "" + "</th>"));
+                $('#right-table').append(tableRow1);
+
+                for (item in table2[0]) {
+                  var rowItem = table2[0][item];
+                  //$('#right-table').append(row[item]['scriptSig']);
+                  var tableRow = $("<tr />");
+                  $('#right-table').append(tableRow);
+                  tableRow.append($("<td>" + item + "</td>"));
+                  tableRow.append($("<td>" + rowItem + "</td>"));                
+                }
+                
+                for (item in newTables[4]) {
+                  var rowItem = newTables[4][item];
+                  //$('#right-table').append(row[item]['scriptSig']);
+                  var tableRow = $("<tr />");
+                  $('#bottom-table').append(tableRow);
+                  tableRow.append($("<td>" + item + "</td>"));
+                  tableRow.append($("<td>" + rowItem + "</td>")); 
+                }
+              }
+            //}
+          if (category == 'address') {
+           for (item in newTables[5]) {             
+              var rowItem = newTables[5][item];
+              var tableRow = $("<tr />");
+              $('#left-table').append(tableRow);
+              console.log("newTablesvvvvvvvv",item)
+              tableRow.append($("<td>" + item + "</td>"));
+              tableRow.append($("<td>" + rowItem + "</td>")); 
+           }
+           for (index in newTables[1]) {
+            var row = newTables[1][index];
+            for (rowItem in row) {
+              var tableRow = $("<tr />");
+              $('#right-table').append(tableRow);
+              tableRow.append($("<td><u><a href='/explorer/tx/" + row[rowItem] + "' class='id-link'>" + row[rowItem].substring(0,50) + ".. </a></u></td>"));
+            }
+            
+          }
+
+          }
+            
+          if (category == 'block') {
+            for (index in newTables[0]) {
             var row = newTables[0][index];
             var tableRow = $("<tr />");
             $('#left-table').append(tableRow);
@@ -277,35 +402,31 @@
               tableRow.append($("<td>" + row + "</td>"));
             }
           }
+          var insideTx = false;
           for (index in newTables[1]) {
             var row = newTables[1][index];
-            var tableRow = $("<tr />");
-            $('#right-table').append(tableRow);
-            tableRow.append($("<td>" + index + "</td>"));
-            if (index == 'hash' || index == 'nextblockhash' && row != '' || index == 'previousblockhash') {
-              tableRow.append($("<td><u><a href='/explorer/block/" + row + "' class='id-link'>" + row.substring(0,35) + ".. </a></u></td>"));
-            } else {
-              tableRow.append($("<td>" + row.substring(0,35) + ".. </td>"));
+              var tableRow = $("<tr />");
+              console.log("roewwwwwww",row)
+              $('#right-table').append(tableRow);
+              tableRow.append($("<td>" + index + "</td>"));
+              if (index == 'hash' || index == 'nextblockhash' && row != '' || index == 'previousblockhash') {
+                tableRow.append($("<td><u><a href='/explorer/block/" + row + "' class='id-link'>" + row.substring(0,35) + ".. </a></u></td>"));
+              } else {
+                tableRow.append($("<td>" + row.substring(0,35) + ".. </td>"));
+              }
+            
             }
-          }
           for (index in newTables[2]) {
             var row = newTables[2][index]; 
-            if (category == 'block') {
+            
               for (item in row) {
                 var rowItem = row[item];
                 var tableRow = $("<tr />");
                 $('#bottom-table').append(tableRow);
                 tableRow.append($("<td><u><a href='/explorer/tx/" + rowItem + "' class='id-link'>" + rowItem.substring(0,50) + ".. </a></u></td>"));
               }
-            } else if (category == 'tx') {
-              for (item in row) {
-                var rowItem = JSON.stringify(row[item]);
-                console.log(rowItem);
-                var tableRow = $("<tr />");
-                $('#bottom-table').append(tableRow);
-                tableRow.append($("<td>" + rowItem + "</td>"));
-              }
-            }
+            
+          }
           }
         //});
       }
