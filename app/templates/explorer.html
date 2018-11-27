@@ -287,8 +287,8 @@
           
           for (var key in dataResult) {
             var leftTable = new Object();
-            leftTable['confirmed_balance'] = {{ balances.confirmed_balance_btc }}
-            leftTable['unconfirmed_balance'] = {{ balances.unconfirmed_balance_btc }}
+            //leftTable['confirmed_balance'] = {{ balances.confirmed_balance_btc }}
+            //leftTable['unconfirmed_balance'] = {{ balances.unconfirmed_balance_btc }}
             leftTable['address'] = dataResult[key]['address']
             leftTable['receiving_amount'] = dataResult[key]['amount']
             leftTable['confirmations'] = dataResult[key]['confirmations']
@@ -374,7 +374,6 @@
               var rowItem = newTables[5][item];
               var tableRow = $("<tr />");
               $('#left-table').append(tableRow);
-              console.log("newTablesvvvvvvvv",item)
               tableRow.append($("<td>" + item + "</td>"));
               tableRow.append($("<td>" + rowItem + "</td>")); 
            }

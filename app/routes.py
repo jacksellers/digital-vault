@@ -170,7 +170,9 @@ def history_xlsx():
 @app.route('/explorer/<category>', methods=['GET', 'POST'])
 @app.route('/explorer/<category>/<search_id>', methods=['GET', 'POST'])
 def explorer(category=None, search_id=""):
-    user = current_user
+    user = current_user    
+    #balancesJson = '{"confirmed_balance_btc": "0", "unconfirmed_balance_btc": "0"}'
+    #balancesPerAddress = json.loads(balancesJson)
     balances = Balance.query.filter_by(user_id=user.id).first()
     form = ExplorerForm()
     if form.validate_on_submit():
@@ -207,7 +209,9 @@ def explorer(category=None, search_id=""):
                 data = search_blockchain_tx(search_id)   
                 if "message" in data:
                     data = search_blockchain_address(search_id)
-                    print("data.......",data)     
+                    # if "message" not in data and search_id != "":
+                    #     user_info = User.query.filter_by(address=search_id).first()
+                    #     balancesPerAddress = Balance.query.filter_by(user_id=user_info.id).first()
 
     return render_template('explorer.html', user=user, balances=balances,
                            form=form, category=category, search_id=search_id, data=data)
@@ -382,7 +386,7 @@ def get_withdrawal():
                 db.session.commit()
                 withdrawal = sendAmountTxID
 
-            # if confirmations >= 6 and confirmation_status == 0:
+            # if confirmations >= 1 and confirmation_status == 0:
             #     confirmation_status = 1
             #     db.session.delete(balances)
             #     db.session.commit()
@@ -399,4 +403,38 @@ def get_withdrawal():
     if withdrawal in ['error-amount', 'error-address']:
         if type(amount) is not float:
             withdrawal = 'error-both'
+    return jsonify(result=withdrawal)
+
+
+@app.route('/check_withdrawal_confirmed')
+@login_required
+def check_withdrawal_confirmed():
+    withdrawal = 'None'
+    user = current_user
+    status = Transfer.query.filter_by(user_id=user.id).all()
+    if status:
+        confirmation_status = status[-1].confirmation_status
+        tx_id = status[-1].tx_id
+        tx_type = status[-1].tx_type
+
+    transaction_info = get_from_bitcoind('gettransaction',[tx_id])
+    confirmations = transaction_info['confirmations']
+
+    balances = Balance.query.filter_by(user_id=user.id).first()
+    balanceUsd = balances.balance_usd
+    confirmedBalanceBTC = balances.confirmed_balance_btc
+    unConfirmedBalanceBTC = balances.unconfirmed_balance_btc
+    
+    if confirmations >= 1 and confirmation_status == 0 and tx_type == 'withdrawal':
+        confirmation_status = 1
+        db.session.delete(balances)
+        db.session.commit()
+        new_confirmed_balance_btc = unConfirmedBalanceBTC
+        unConfirmedBalanceBTC = 0.00
+        new_balances = Balance(confirmed_balance_btc=new_confirmed_balance_btc, unconfirmed_balance_btc=unConfirmedBalanceBTC , balance_usd=balanceUsd, user_id=user.id)
+        transfer = Transfer(tx_type='withdrawal', amount=new_confirmed_balance_btc, currency='BTC', tx_id=tx_id,confirmation_status=confirmation_status, user_id=user.id)
+        db.session.add_all([transfer, new_balances])
+        db.session.commit()
+        withdrawal = tx_id 
+    
     return jsonify(result=withdrawal)

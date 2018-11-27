@@ -79,6 +79,26 @@
                     $('#deposit-button').css('background-color', '#425964');
                     $('#withdraw-button').css('background-color', '#222d32');
                     $('#funding-header').html('<h3>Bitcoin withdrawal</h3>');
+                    var getWithdrawal = setInterval(function() {
+                        $.getJSON($SCRIPT_ROOT + "/check_withdrawal_confirmed", function(data) {
+                          var withdrawal = data['result'];
+                          console.log("withdrawal..................",withdrawal)
+                          if (withdrawal != 'None') {
+                            console.log("withdrawalahdjhasd............")
+                            
+                              $('#funding-header').html('<h3>Bitcoin withdrawal <i class="fas fa-check-circle"></i></h3>');
+                              $('#qrcode').empty();
+                              $('#funding-address').empty();
+                              $('#funding-instructions-1').text('Withdrawal successful with CONFIRMED Balance');
+                              $('#funding-instructions-2').html('Transaction ID: <a href="/explorer/tx/' + withdrawal + '">' + withdrawal + '</a>');
+                              //$('#funding-instructions-2').html('Transaction ID: <a target="_blank" href="https://testnet.blockchain.info/tx/' + withdrawal + '">' + withdrawal + '</a>');
+                            
+                            clearInterval(getWithdrawal);
+                          }
+                        });
+                      },
+                      10000
+                      );
                     $('#funding-instructions-1').text('Withdraw bitcoins by providing us with an address and the amount you want to send.');
                     $('#funding-instructions-2').text('Please ensure that you enter the correct bitcoin address, otherwise your funds may not be recoverable.');
                     $('#qrcode').empty();
@@ -108,9 +128,9 @@
                               $('#funding-header').html('<h3>Bitcoin withdrawal <i class="fas fa-check-circle"></i></h3>');
                               $('#qrcode').empty();
                               $('#funding-address').empty();
-                              $('#funding-instructions-1').text('Withdrawal successful with Unconfirmed Balance');
-                              //$('#funding-instructions-2').html('Transaction ID: <a href="/explorer/tx/' + withdrawal + '">' + withdrawal + '</a>');
-                              $('#funding-instructions-2').html('Transaction ID: <a target="_blank" href="https://testnet.blockchain.info/tx/' + withdrawal + '">' + withdrawal + '</a>');
+                              $('#funding-instructions-1').text('Withdrawal successful with UNCONFIRMED Balance');
+                              $('#funding-instructions-2').html('Transaction ID: <a href="/explorer/tx/' + withdrawal + '">' + withdrawal + '</a>');
+                              //$('#funding-instructions-2').html('Transaction ID: <a target="_blank" href="https://testnet.blockchain.info/tx/' + withdrawal + '">' + withdrawal + '</a>');
                             }
                             clearInterval(getWithdrawal);
                           }
