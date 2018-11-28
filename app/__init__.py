@@ -9,7 +9,7 @@ from flask import Flask
 
 app = Flask(__name__)
 excel.init_excel(app)
-sslify = SSLify(app)
+#sslify = SSLify(app, subdomains = True)
 login = LoginManager(app)
 login.login_view = 'login'
 login.login_message = ''
