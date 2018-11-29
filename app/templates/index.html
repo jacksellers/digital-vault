@@ -115,7 +115,8 @@
                   {% for row in table %}
                     <tr>
                       {% if row[6] != '' %}
-                        <td><a href={{ "https://blockchain.info/tx/" + row[6] }} class="id-link">{{ row[0] }}</a></td>
+                        <!--<td><a href={{ "https://blockchain.info/tx/" + row[6] }} class="id-link">{{ row[0] }}</a></td>-->
+                        <td><a href={{ "/explorer/tx/" + row[6] }} class="id-link">{{ row[0] }}</a></td>
                       {% else %}
                         <td><a class="id-link">{{ row[0] }}</a></td>
                       {% endif %}

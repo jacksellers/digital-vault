@@ -55,7 +55,7 @@
                         background: "rgb(184, 184, 184)",
                         text: address
                       });
-                      $('#funding-address').html('<strong>' + address + '</strong>');
+                      $('#funding-address').html('<strong> <a href="/explorer/address/' + address + '">' + address + '</a> </strong>');
                     });
                     var getDeposit = setInterval(function() {
                       $.getJSON($SCRIPT_ROOT + "/get_deposit", function(data) {
@@ -65,8 +65,8 @@
                           $('#qrcode').empty();
                           $('#funding-header').html('<h3>Bitcoin deposit <i class="fas fa-check-circle"></i></h3>');
                           $('#funding-instructions-1').text('Deposit successful');
-                          //$('#funding-instructions-2').html('Transaction ID: <a href="/explorer/tx/' + deposit + '">' + deposit + '</a>');
-                          $('#funding-instructions-2').html('Transaction ID: <a target="_blank" href="https://testnet.blockchain.info/tx/' + deposit + '">' + deposit + '</a>');
+                          $('#funding-instructions-2').html('Transaction ID: <a href="/explorer/tx/' + deposit + '">' + deposit + '</a>');
+                          //$('#funding-instructions-2').html('Transaction ID: <a target="_blank" href="https://testnet.blockchain.info/tx/' + deposit + '">' + deposit + '</a>');
                           $('#funding-address').empty();
                           clearInterval(getDeposit);
                         }
