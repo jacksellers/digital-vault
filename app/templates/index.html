@@ -78,6 +78,7 @@
                 $("#rss-feeds").rss("https://www.coindesk.com/feed/",
                 {
                   limit: 3,
+                  ssl: true,
                   entryTemplate: '<li><a href="{url}" class="rss-link" target="_blank" style="font-size: 13px;">{title}</a></li>'
                 });
               });
