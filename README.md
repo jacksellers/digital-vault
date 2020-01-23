@@ -1,9 +1,12 @@
+NOTE: This repository is no longer actively maintained. Since it was only ever supposed to serve as a prototype, only testnet bitcoins can be used (as opposed to mainnet coins). This software will not function unless you have a full bitcoin node running and have made the necessary changes in this repository's source code to reflect that.
+
 # Digital Vault
 ## A Bitcoin custody platform
 ### Dependencies:
 - [Python 3](https://www.python.org/)
 - [Pip](https://pypi.org/project/pip/)
 - [Flask](http://flask.pocoo.org/)
+- [Bitcoin Core](https://bitcoin.org/en/bitcoin-core/)
 #### Installation:
 ```
 git clone https://github.com/jackwsellers/digital-vault.git
